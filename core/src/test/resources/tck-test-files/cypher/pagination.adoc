@@ -1,0 +1,555 @@
+:toc:
+
+= Cypher pagination tests
+
+Tests for queries including reserved arguments `skip` and `limit`.
+
+
+== Inputs
+
+[source,graphql,schema=true]
+----
+type Movie {
+    id: ID
+    title: String
+    actors: [Actor!] @relation(name: "ACTS_IN", direction: IN)
+}
+
+type Actor {
+    id: ID
+    name: String
+    movies: [Movie!] @relation(name: "ACTS_IN", direction: OUT)
+}
+
+input ActorOptions {
+  limit: Int = 10
+  skip: Int = 0
+}
+----
+
+
+== Configuration
+
+.Configuration
+[source,json,schema-config=true]
+----
+{
+  "queryOptionStyle": "INPUT_TYPE",
+  "useWhereFilter": true,
+  "pluralizeFields": true
+}
+----
+
+== For query
+
+=== Skipping
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies(options: { skip: 1 }) {
+        title
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesSkip" : 1
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies SKIP $moviesSkip
+----
+
+'''
+
+=== Limit
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies(options: { limit: 1 }) {
+        title
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesLimit" : 1
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies LIMIT $moviesLimit
+----
+
+'''
+
+=== Skip + Limit
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies(options: { limit: 1, skip: 2  }) {
+        title
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesLimit" : 1,
+  "moviesSkip" : 2
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies SKIP $moviesSkip LIMIT $moviesLimit
+----
+
+'''
+
+=== Skip + Limit as variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($skip: Int, $limit: Int) {
+    movies(options: { limit: $limit, skip: $skip }) {
+        title
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "skip": 0,
+    "limit": 0
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesLimit" : 0,
+  "moviesSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies SKIP $moviesSkip LIMIT $moviesLimit
+----
+
+'''
+
+=== Skip + Limit with other variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($skip: Int, $limit: Int, $title: String) {
+    movies(
+        options: { limit: $limit, skip: $skip },
+        where: { title: $title }
+    ) {
+        title
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "limit": 1,
+    "skip": 2,
+    "title": "some title"
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesLimit" : 1,
+  "moviesSkip" : 2,
+  "whereMoviesTitle" : "some title"
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+WHERE movies.title = $whereMoviesTitle
+RETURN movies {
+	.title
+} AS movies SKIP $moviesSkip LIMIT $moviesLimit
+----
+
+'''
+
+=== Default values
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    actors {
+        name
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+RETURN actors {
+	.name
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+== For projection
+
+=== Skipping
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    actors {
+        name
+        movies (options: { skip: 1 }) {
+          title
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsMoviesSkip" : 1,
+  "actorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+CALL {
+	WITH actors
+	MATCH (actors)-[:ACTS_IN]->(actorsMovies:Movie)
+	WITH actorsMovies SKIP $actorsMoviesSkip
+	RETURN collect(actorsMovies {
+		.title
+	}) AS actorsMovies
+}
+RETURN actors {
+	.name,
+	movies: actorsMovies
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+=== Limit
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    actors {
+        name
+        movies (options: { limit: 1 }) {
+          title
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsMoviesLimit" : 1,
+  "actorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+CALL {
+	WITH actors
+	MATCH (actors)-[:ACTS_IN]->(actorsMovies:Movie)
+	WITH actorsMovies LIMIT $actorsMoviesLimit
+	RETURN collect(actorsMovies {
+		.title
+	}) AS actorsMovies
+}
+RETURN actors {
+	.name,
+	movies: actorsMovies
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+=== Skip + Limit
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    actors {
+        name
+        movies (options: { limit: 1, skip: 2 }) {
+          title
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsMoviesLimit" : 1,
+  "actorsMoviesSkip" : 2,
+  "actorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+CALL {
+	WITH actors
+	MATCH (actors)-[:ACTS_IN]->(actorsMovies:Movie)
+	WITH actorsMovies SKIP $actorsMoviesSkip LIMIT $actorsMoviesLimit
+	RETURN collect(actorsMovies {
+		.title
+	}) AS actorsMovies
+}
+RETURN actors {
+	.name,
+	movies: actorsMovies
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+=== Skip + Limit as variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($skip: Int, $limit: Int) {
+    actors {
+        name
+        movies (options: { limit: $limit, skip: $skip }) {
+          title
+        }
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "skip": 0,
+    "limit": 0
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsMoviesLimit" : 0,
+  "actorsMoviesSkip" : 0,
+  "actorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+CALL {
+	WITH actors
+	MATCH (actors)-[:ACTS_IN]->(actorsMovies:Movie)
+	WITH actorsMovies SKIP $actorsMoviesSkip LIMIT $actorsMoviesLimit
+	RETURN collect(actorsMovies {
+		.title
+	}) AS actorsMovies
+}
+RETURN actors {
+	.name,
+	movies: actorsMovies
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+=== Skip + Limit with other variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($skip: Int, $limit: Int, $title: String) {
+    actors {
+        name
+        movies (
+          options: { limit: $limit, skip: $skip },
+          where: { title: $title }
+        ) {
+          title
+        }
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "limit": 1,
+    "skip": 2,
+    "title": "some title"
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "actorsLimit" : 10,
+  "actorsMoviesLimit" : 1,
+  "actorsMoviesSkip" : 2,
+  "actorsSkip" : 0,
+  "whereActorsMoviesTitle" : "some title"
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (actors:Actor)
+CALL {
+	WITH actors
+	MATCH (actors)-[:ACTS_IN]->(actorsMovies:Movie)
+	WHERE actorsMovies.title = $whereActorsMoviesTitle
+	WITH actorsMovies SKIP $actorsMoviesSkip LIMIT $actorsMoviesLimit
+	RETURN collect(actorsMovies {
+		.title
+	}) AS actorsMovies
+}
+RETURN actors {
+	.name,
+	movies: actorsMovies
+} AS actors SKIP $actorsSkip LIMIT $actorsLimit
+----
+
+'''
+
+=== Default values
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies {
+        title
+        actors {
+            name
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesActorsLimit" : 10,
+  "moviesActorsSkip" : 0
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+CALL {
+	WITH movies
+	MATCH (movies)<-[:ACTS_IN]-(moviesActors:Actor)
+	WITH moviesActors SKIP $moviesActorsSkip LIMIT $moviesActorsLimit
+	RETURN collect(moviesActors {
+		.name
+	}) AS moviesActors
+}
+RETURN movies {
+	.title,
+	actors: moviesActors
+} AS movies
+----
+
+'''

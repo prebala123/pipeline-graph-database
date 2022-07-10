@@ -1,0 +1,216 @@
+:toc:
+
+= Schema operations tests
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type Person { name: String }
+type Location { name: String }
+
+type CustomQueryType {
+  person(name:String) : Person @cypher(statement:"MATCH (p:Person { name:{name} }) RETURN p")
+}
+
+schema {
+  query: CustomQueryType
+}
+----
+
+== Augmentation
+
+=== Test schema
+
+.Configuration
+[source,json,schema-config=true]
+----
+{}
+----
+
+.Augmented Schema
+[source,graphql]
+----
+schema {
+  query: CustomQueryType
+  mutation: Mutation
+}
+
+type CustomQueryType {
+  location(filter: _LocationFilter, first: Int, name: String, name_contains: String, name_ends_with: String, name_gt: String, name_gte: String, name_in: [String!], name_lt: String, name_lte: String, name_matches: String, name_not: String, name_not_contains: String, name_not_ends_with: String, name_not_in: [String!], name_not_starts_with: String, name_starts_with: String, offset: Int, orderBy: [_LocationOrdering!]): [Location!]!
+  person(name: String): Person
+}
+
+type Location {
+  name: String
+}
+
+type Mutation {
+  createLocation(name: String): Location!
+  createPerson(name: String): Person!
+}
+
+type Person {
+  name: String
+}
+
+enum RelationDirection {
+  BOTH
+  IN
+  OUT
+}
+
+enum _LocationOrdering {
+  name_asc
+  name_desc
+}
+
+enum _PersonOrdering {
+  name_asc
+  name_desc
+}
+
+input _LocationFilter {
+  AND: [_LocationFilter!]
+  NOT: [_LocationFilter!]
+  OR: [_LocationFilter!]
+  name: String
+  name_contains: String
+  name_ends_with: String
+  name_gt: String
+  name_gte: String
+  name_in: [String]
+  name_lt: String
+  name_lte: String
+  name_matches: String
+  name_not: String
+  name_not_contains: String
+  name_not_ends_with: String
+  name_not_in: [String]
+  name_not_starts_with: String
+  name_starts_with: String
+}
+
+input _PersonFilter {
+  AND: [_PersonFilter!]
+  NOT: [_PersonFilter!]
+  OR: [_PersonFilter!]
+  name: String
+  name_contains: String
+  name_ends_with: String
+  name_gt: String
+  name_gte: String
+  name_in: [String]
+  name_lt: String
+  name_lte: String
+  name_matches: String
+  name_not: String
+  name_not_contains: String
+  name_not_ends_with: String
+  name_not_in: [String]
+  name_not_starts_with: String
+  name_starts_with: String
+}
+
+----
+
+'''
+
+=== Schema with capitalized queries
+
+.Configuration
+[source,json,schema-config=true]
+----
+{
+  "capitalizeQueryFields": true
+}
+----
+
+.Augmented Schema
+[source,graphql]
+----
+schema {
+  query: CustomQueryType
+  mutation: Mutation
+}
+
+type CustomQueryType {
+  Location(filter: _LocationFilter, first: Int, name: String, name_contains: String, name_ends_with: String, name_gt: String, name_gte: String, name_in: [String!], name_lt: String, name_lte: String, name_matches: String, name_not: String, name_not_contains: String, name_not_ends_with: String, name_not_in: [String!], name_not_starts_with: String, name_starts_with: String, offset: Int, orderBy: [_LocationOrdering!]): [Location!]!
+  Person(filter: _PersonFilter, first: Int, name: String, name_contains: String, name_ends_with: String, name_gt: String, name_gte: String, name_in: [String!], name_lt: String, name_lte: String, name_matches: String, name_not: String, name_not_contains: String, name_not_ends_with: String, name_not_in: [String!], name_not_starts_with: String, name_starts_with: String, offset: Int, orderBy: [_PersonOrdering!]): [Person!]!
+  person(name: String): Person
+}
+
+type Location {
+  name: String
+}
+
+type Mutation {
+  createLocation(name: String): Location!
+  createPerson(name: String): Person!
+}
+
+type Person {
+  name: String
+}
+
+enum RelationDirection {
+  BOTH
+  IN
+  OUT
+}
+
+enum _LocationOrdering {
+  name_asc
+  name_desc
+}
+
+enum _PersonOrdering {
+  name_asc
+  name_desc
+}
+
+input _LocationFilter {
+  AND: [_LocationFilter!]
+  NOT: [_LocationFilter!]
+  OR: [_LocationFilter!]
+  name: String
+  name_contains: String
+  name_ends_with: String
+  name_gt: String
+  name_gte: String
+  name_in: [String]
+  name_lt: String
+  name_lte: String
+  name_matches: String
+  name_not: String
+  name_not_contains: String
+  name_not_ends_with: String
+  name_not_in: [String]
+  name_not_starts_with: String
+  name_starts_with: String
+}
+
+input _PersonFilter {
+  AND: [_PersonFilter!]
+  NOT: [_PersonFilter!]
+  OR: [_PersonFilter!]
+  name: String
+  name_contains: String
+  name_ends_with: String
+  name_gt: String
+  name_gte: String
+  name_in: [String]
+  name_lt: String
+  name_lte: String
+  name_matches: String
+  name_not: String
+  name_not_contains: String
+  name_not_ends_with: String
+  name_not_in: [String]
+  name_not_starts_with: String
+  name_starts_with: String
+}
+
+----
+
+'''

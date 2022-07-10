@@ -1,0 +1,1164 @@
+:toc:
+
+= Translator Tests
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type Person {
+  name: String
+  age: Int
+  livesIn : Location @relation(name:"LIVES_IN", direction: OUT)
+  livedIn : [Location] @relation(name:"LIVED_IN", direction: OUT)
+  born : Birth
+  died : Death
+  location: _Neo4jPoint
+}
+interface Temporal {
+  date: String
+}
+type Birth implements Temporal @relation(name:"BORN") {
+  from: Person
+  to: Location
+  date: String
+}
+type Death implements Temporal @relation(name:"DIED",from:"who",to:"where") {
+  who: Person
+  where: Location
+  date: String
+}
+interface Location {
+  name: String
+  founded: Person @relation(name:"FOUNDED", direction: IN)
+  sort_Arg: String
+}
+type City implements Location {
+  name: String
+  founded: Person @relation(name:"FOUNDED", direction: IN)
+  sort_Arg: String
+  city_Arg: String
+}
+type Village implements Location {
+  name: String
+  founded: Person @relation(name:"FOUNDED", direction: IN)
+  sort_Arg: String
+  villageArg: String
+}
+# enum _PersonOrdering { name_asc, name_desc, age_asc, age_desc }
+enum E { pi, e }
+type Query {
+  person : [Person]
+  personByName(name:String) : Person
+}
+----
+
+== Tests
+
+=== order by query single
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:person(orderBy:[name_asc]) { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person ORDER BY person.name ASC
+----
+
+'''
+
+=== rich relationship
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name born { date to { name } } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[personBorn:BORN]->(personBornTo:Location)
+	RETURN personBorn {
+		.date,
+		to: personBornTo {
+			.name
+		}
+	} AS personBorn LIMIT 1
+}
+RETURN person {
+	.name,
+	born: personBorn
+} AS person
+----
+
+'''
+
+=== nested query multi
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name age livedIn { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[:LIVED_IN]->(personLivedIn:Location)
+	RETURN collect(personLivedIn {
+		.name
+	}) AS personLivedIn
+}
+RETURN person {
+	.name,
+	.age,
+	livedIn: personLivedIn
+} AS person
+----
+
+'''
+
+=== inline fragment
+
+.GraphQL-Query
+[source,graphql]
+----
+ query { person { ... on Person { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.name
+} AS person
+----
+
+'''
+
+=== simple query offset
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:person(offset:3) { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personOffset" : 3
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person SKIP $personOffset
+----
+
+'''
+
+=== query offset as variable
+
+.GraphQL-Query
+[source,graphql]
+----
+query getPersons($offset: Int){
+  person(offset: $offset) {
+    age
+  }
+}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{
+  "offset": 10
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personOffset" : 10
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person SKIP $personOffset
+----
+
+'''
+
+=== nested query
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name age livesIn { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[:LIVES_IN]->(personLivesIn:Location)
+	RETURN personLivesIn {
+		.name
+	} AS personLivesIn LIMIT 1
+}
+RETURN person {
+	.name,
+	.age,
+	livesIn: personLivesIn
+} AS person
+----
+
+'''
+
+=== simple query
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name age } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.name,
+	.age
+} AS person
+----
+
+'''
+
+=== named fragment
+
+.GraphQL-Query
+[source,graphql]
+----
+ query { person { ...name } } fragment name on Person { name }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.name
+} AS person
+----
+
+'''
+
+=== rich relationship custom field names
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name died { date where { name } } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[personDied:DIED]->(personDiedWhere:Location)
+	RETURN personDied {
+		.date,
+		where: personDiedWhere {
+			.name
+		}
+	} AS personDied LIMIT 1
+}
+RETURN person {
+	.name,
+	died: personDied
+} AS person
+----
+
+'''
+
+=== rich relationship 2nd hop
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name born { date to { name founded { name } } } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[personBorn:BORN]->(personBornTo:Location)
+	CALL {
+		WITH personBornTo
+		OPTIONAL MATCH (personBornTo)<-[:FOUNDED]-(personBornToFounded:Person)
+		RETURN personBornToFounded {
+			.name
+		} AS personBornToFounded LIMIT 1
+	}
+	RETURN personBorn {
+		.date,
+		to: personBornTo {
+			.name,
+			founded: personBornToFounded
+		}
+	} AS personBorn LIMIT 1
+}
+RETURN person {
+	.name,
+	born: personBorn
+} AS person
+----
+
+'''
+
+=== rich relationship 3 rd hop
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name born { date to { name founded { name born { date to { name } } } } } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[personBorn:BORN]->(personBornTo:Location)
+	CALL {
+		WITH personBornTo
+		OPTIONAL MATCH (personBornTo)<-[:FOUNDED]-(personBornToFounded:Person)
+		CALL {
+			WITH personBornToFounded
+			OPTIONAL MATCH (personBornToFounded)-[personBornToFoundedBorn:BORN]->(personBornToFoundedBornTo:Location)
+			RETURN personBornToFoundedBorn {
+				.date,
+				to: personBornToFoundedBornTo {
+					.name
+				}
+			} AS personBornToFoundedBorn LIMIT 1
+		}
+		RETURN personBornToFounded {
+			.name,
+			born: personBornToFoundedBorn
+		} AS personBornToFounded LIMIT 1
+	}
+	RETURN personBorn {
+		.date,
+		to: personBornTo {
+			.name,
+			founded: personBornToFounded
+		}
+	} AS personBorn LIMIT 1
+}
+RETURN person {
+	.name,
+	born: personBorn
+} AS person
+----
+
+'''
+
+=== nested query parameter
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name age livedIn(name:"Berlin") { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personLivedInName" : "Berlin"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[:LIVED_IN]->(personLivedIn:Location)
+	WHERE personLivedIn.name = $personLivedInName
+	RETURN collect(personLivedIn {
+		.name
+	}) AS personLivedIn
+}
+RETURN person {
+	.name,
+	.age,
+	livedIn: personLivedIn
+} AS person
+----
+
+'''
+
+=== order by query two
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:person(orderBy:[age_desc, name_asc]) { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person ORDER BY person.age DESC, person.name ASC
+----
+
+'''
+
+=== order by with underscore
+
+.GraphQL-Query
+[source,graphql]
+----
+ { location(orderBy:[sort_Arg_desc]) { name } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (location:Location)
+RETURN location {
+	.name
+} AS location ORDER BY location.sort_Arg DESC
+----
+
+'''
+
+=== named fragment multi field
+
+.GraphQL-Query
+[source,graphql]
+----
+  fragment details on Person { name, age } query { person { ...details } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.name,
+	.age
+} AS person
+----
+
+'''
+
+=== simple query alias
+
+.GraphQL-Query
+[source,graphql]
+----
+ { foo:person {
+     n:name
+   }
+ }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (foo:Person)
+RETURN foo {
+	n: foo.name
+} AS foo
+----
+
+'''
+
+=== simple query first
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:person(first:2) { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personFirst" : 2
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person LIMIT $personFirst
+----
+
+'''
+
+=== simple query where
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:personByName(name:"Joe") { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personName" : "Joe"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+WHERE person.name = $personName
+RETURN person {
+	.age
+} AS person LIMIT 1
+----
+
+'''
+
+=== nested query slice offset
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { livedIn(offset:3) { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personLivedInOffset" : 3
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[:LIVED_IN]->(personLivedIn:Location)
+	WITH personLivedIn SKIP $personLivedInOffset
+	RETURN collect(personLivedIn {
+		.name
+	}) AS personLivedIn
+}
+RETURN person {
+	livedIn: personLivedIn
+} AS person
+----
+
+'''
+
+=== nested query slice first
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { livedIn(first:2) { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personLivedInFirst" : 2
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[:LIVED_IN]->(personLivedIn:Location)
+	WITH personLivedIn LIMIT $personLivedInFirst
+	RETURN collect(personLivedIn {
+		.name
+	}) AS personLivedIn
+}
+RETURN person {
+	livedIn: personLivedIn
+} AS person
+----
+
+'''
+
+=== nested query 2 nd hop
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name age livesIn { name founded {name}} } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[:LIVES_IN]->(personLivesIn:Location)
+	CALL {
+		WITH personLivesIn
+		OPTIONAL MATCH (personLivesIn)<-[:FOUNDED]-(personLivesInFounded:Person)
+		RETURN personLivesInFounded {
+			.name
+		} AS personLivesInFounded LIMIT 1
+	}
+	RETURN personLivesIn {
+		.name,
+		founded: personLivesInFounded
+	} AS personLivesIn LIMIT 1
+}
+RETURN person {
+	.name,
+	.age,
+	livesIn: personLivesIn
+} AS person
+----
+
+'''
+
+=== inline fragment multi fields
+
+.GraphQL-Query
+[source,graphql]
+----
+query { person { ... on Person { name,age } } }
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.name,
+	.age
+} AS person
+----
+
+'''
+
+=== simple query first offset
+
+.GraphQL-Query
+[source,graphql]
+----
+ { person:person(first:2,offset:3) { age } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personFirst" : 2,
+  "personOffset" : 3
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+RETURN person {
+	.age
+} AS person SKIP $personOffset LIMIT $personFirst
+----
+
+'''
+
+=== nested query slice first offset
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { livedIn(first:2,offset:3) { name } } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personLivedInFirst" : 2,
+  "personLivedInOffset" : 3
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[:LIVED_IN]->(personLivedIn:Location)
+	WITH personLivedIn SKIP $personLivedInOffset LIMIT $personLivedInFirst
+	RETURN collect(personLivedIn {
+		.name
+	}) AS personLivedIn
+}
+RETURN person {
+	livedIn: personLivedIn
+} AS person
+----
+
+'''
+
+=== nested query slice first offset
+
+.GraphQL-Query
+[source,graphql]
+----
+{ location { name __typename } }
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "locationValidTypes" : [ "City", "Village" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (location:Location)
+RETURN location {
+	.name,
+	__typename: head([label IN labels(location) WHERE label IN $locationValidTypes])
+} AS location
+----
+
+'''
+
+=== introspection
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+  person {
+    name
+    __typename
+    born {
+      __typename
+    }
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personValidTypes" : [ "Person" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	OPTIONAL MATCH (person)-[personBorn:BORN]->(personBornTo:Location)
+	RETURN personBorn {
+		__typename: 'Birth'
+	} AS personBorn LIMIT 1
+}
+RETURN person {
+	.name,
+	__typename: head([label IN labels(person) WHERE label IN $personValidTypes]),
+	born: personBorn
+} AS person
+----
+
+'''
+
+=== inline fragments on interfaces
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+  location {
+    name
+    __typename
+    ... on City {
+      city_Arg
+    }
+    ... on Village {
+      villageArg
+    }
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "locationValidTypes" : [ "City", "Village" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (location:Location)
+RETURN location {
+	.name,
+	__typename: head([label IN labels(location) WHERE label IN $locationValidTypes]),
+	.city_Arg,
+	.villageArg
+} AS location
+----
+
+'''
+
+=== fragments on interfaces
+
+.GraphQL-Query
+[source,graphql]
+----
+query {
+  location {
+    ...details
+  }
+}
+fragment details on Location {
+  name
+  __typename
+  ... on City {
+    city_Arg
+  }
+  ... on Village {
+    villageArg
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "locationValidTypes" : [ "City", "Village" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (location:Location)
+RETURN location {
+	.name,
+	__typename: head([label IN labels(location) WHERE label IN $locationValidTypes]),
+	.city_Arg,
+	.villageArg
+} AS location
+----
+
+'''
+
+=== query spatial types
+
+.GraphQL-Query
+[source,graphql]
+----
+query {
+  person(location:{longitude: 1, latitude: 2 }){
+    name
+    location {
+      crs
+      longitude
+      latitude
+      height
+    }
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personLocationAnd1Longitude" : 1.0,
+  "personLocationAnd2Latitude" : 2.0
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+WHERE (person.location.longitude = $personLocationAnd1Longitude
+	AND person.location.latitude = $personLocationAnd2Latitude)
+RETURN person {
+	.name,
+	location:  {
+		crs: person.location.crs,
+		longitude: person.location.longitude,
+		latitude: person.location.latitude,
+		height: person.location.height
+	}
+} AS person
+----
+
+'''
+
+=== mutate spatial types
+
+.GraphQL-Query
+[source,graphql]
+----
+mutation{
+  createPerson(name:"Test2", location:{x: 1, y: 2, z: 3, crs: "wgs-84-3d"}){
+    name
+    location{
+      crs
+      srid
+      latitude
+      longitude
+      height
+    }
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "createPersonLocation" : {
+    "x" : 1.0,
+    "y" : 2.0,
+    "z" : 3.0,
+    "crs" : "wgs-84-3d"
+  },
+  "createPersonName" : "Test2"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CREATE (createPerson:Person  {
+	name: $createPersonName,
+	location: point($createPersonLocation)
+})
+WITH createPerson
+RETURN createPerson {
+	.name,
+	location:  {
+		crs: createPerson.location.crs,
+		srid: createPerson.location.srid,
+		latitude: createPerson.location.latitude,
+		longitude: createPerson.location.longitude,
+		height: createPerson.location.height
+	}
+} AS createPerson
+----
+
+'''
+
+=== enforce typeName on interfaces
+
+.Query configuration
+[source,json,query-config=true]
+----
+{  "queryTypeOfInterfaces": true }
+----
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+  location {
+    name
+    ... on City {
+      city_Arg
+    }
+    ... on Village {
+      villageArg
+    }
+  }
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "locationValidTypes" : [ "City", "Village" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (location:Location)
+RETURN location {
+	.name,
+	.city_Arg,
+	.villageArg,
+	__typename: head([label IN labels(location) WHERE label IN $locationValidTypes])
+} AS location
+----
+
+'''

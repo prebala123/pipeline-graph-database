@@ -1,0 +1,375 @@
+:toc:
+
+= Cypher pagination tests
+
+Tests for queries including reserved arguments `skip` and `limit`.
+
+
+== Inputs
+
+[source,graphql,schema=true]
+----
+type Movie {
+    id: ID
+    title: String
+    genres: [Genre!] @relation(name: "HAS_GENRE", direction: OUT)
+}
+
+type Genre {
+    id: ID
+    name: String
+}
+
+input GenreOptions {
+  limit: Int
+  skip: Int
+  sort: [GenreSort!] = [{name: ASC}]
+}
+
+input GenreSort {
+    id: SortDirection
+    name: SortDirection
+}
+----
+
+== Configuration
+
+.Configuration
+[source,json,schema-config=true]
+----
+{
+  "queryOptionStyle": "INPUT_TYPE",
+  "useWhereFilter": true,
+  "pluralizeFields": true
+}
+----
+
+== For query
+
+=== Simple Sort
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies(options: { sort: [{ id: DESC }] }) {
+        title
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies ORDER BY movies.id DESC
+----
+
+'''
+
+=== Multi Sort
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies(options: { sort: [{ id: DESC }, { title: ASC }] }) {
+        title
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+RETURN movies {
+	.title
+} AS movies ORDER BY movies.id DESC, movies.title ASC
+----
+
+'''
+
+=== Sort with skip limit & with other variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($title: String, $skip: Int, $limit: Int, $sort: [MovieSort!]) {
+    movies(
+        options: {
+            sort: $sort
+            skip: $skip
+            limit: $limit
+        }
+        where: {
+            title: $title
+        }
+    ) {
+        title
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "skip": 0,
+    "limit": 0,
+    "title" : "some title",
+    "sort": [{ "id": "DESC" }, { "title": "ASC" }]
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesLimit" : 0,
+  "moviesSkip" : 0,
+  "whereMoviesTitle" : "some title"
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+WHERE movies.title = $whereMoviesTitle
+RETURN movies {
+	.title
+} AS movies ORDER BY movies.id DESC, movies.title ASC SKIP $moviesSkip LIMIT $moviesLimit
+----
+
+'''
+
+=== Default values
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    genres {
+        name
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (genres:Genre)
+RETURN genres {
+	.name
+} AS genres ORDER BY genres.name ASC
+----
+
+'''
+
+== For projection
+
+=== Simple Sort
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies {
+        genres(options: { sort: [{ name: DESC }] }) {
+            name
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+CALL {
+	WITH movies
+	MATCH (movies)-[:HAS_GENRE]->(moviesGenres:Genre)
+	WITH moviesGenres ORDER BY moviesGenres.name DESC
+	RETURN collect(moviesGenres {
+		.name
+	}) AS moviesGenres
+}
+RETURN movies {
+	genres: moviesGenres
+} AS movies
+----
+
+'''
+
+=== Multi Sort
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies {
+        genres(options: { sort: [{ id: DESC }, { name: ASC }] }) {
+            name
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+CALL {
+	WITH movies
+	MATCH (movies)-[:HAS_GENRE]->(moviesGenres:Genre)
+	WITH moviesGenres ORDER BY moviesGenres.id DESC, moviesGenres.name ASC
+	RETURN collect(moviesGenres {
+		.name
+	}) AS moviesGenres
+}
+RETURN movies {
+	genres: moviesGenres
+} AS movies
+----
+
+'''
+
+=== Sort with skip limit & with other variables
+
+.GraphQL-Query
+[source,graphql]
+----
+query($name: String, $skip: Int, $limit: Int, $sort: [GenreSort!]) {
+    movies {
+        genres(
+            options: {
+                sort: $sort
+                skip: $skip
+                limit: $limit
+            }
+            where: {
+                name: $name
+            }
+        ) {
+            name
+        }
+        title
+    }
+}
+----
+
+.GraphQL params input
+[source,json,request=true]
+----
+{
+    "skip": 1,
+    "limit": 2,
+    "name" : "some name",
+    "sort": [{ "id": "DESC" }, { "name": "ASC" }]
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{
+  "moviesGenresLimit" : 2,
+  "moviesGenresSkip" : 1,
+  "whereMoviesGenresName" : "some name"
+}
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+CALL {
+	WITH movies
+	MATCH (movies)-[:HAS_GENRE]->(moviesGenres:Genre)
+	WHERE moviesGenres.name = $whereMoviesGenresName
+	WITH moviesGenres ORDER BY moviesGenres.id DESC, moviesGenres.name ASC SKIP $moviesGenresSkip LIMIT $moviesGenresLimit
+	RETURN collect(moviesGenres {
+		.name
+	}) AS moviesGenres
+}
+RETURN movies {
+	genres: moviesGenres,
+	.title
+} AS movies
+----
+
+'''
+
+=== Default values
+
+.GraphQL-Query
+[source,graphql]
+----
+{
+    movies {
+        title
+        genres {
+            name
+        }
+    }
+}
+----
+
+.Expected Cypher params
+[source,json]
+----
+{ }
+----
+
+.Expected Cypher output
+[source,cypher]
+----
+MATCH (movies:Movie)
+CALL {
+	WITH movies
+	MATCH (movies)-[:HAS_GENRE]->(moviesGenres:Genre)
+	WITH moviesGenres ORDER BY moviesGenres.name ASC
+	RETURN collect(moviesGenres {
+		.name
+	}) AS moviesGenres
+}
+RETURN movies {
+	.title,
+	genres: moviesGenres
+} AS movies
+----
+
+'''

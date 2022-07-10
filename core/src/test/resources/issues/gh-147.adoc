@@ -1,0 +1,133 @@
+:toc:
+
+= GitHub Issue #147: Filtering on Directive in Combination with Filtering on Type Field
+
+== Schema
+
+[source,graphql,schema=true]
+----
+interface Person {
+    name: ID!
+    born: Int
+    movies: [Movie]
+    score(value:Int!): Int @cypher(statement:"RETURN $value")
+}
+
+type Actor implements Person {
+    name: ID!
+    born: Int
+    movies: [Movie] @relation(name:"ACTED_IN")
+    score(value:Int!): Int @cypher(statement:"RETURN $value")
+
+    namedColleagues(name: String!): [Person] @cypher(statement: "MATCH (this)-[:ACTED_IN]->()<-[:ACTED_IN]-(other) WHERE other.name CONTAINS $name RETURN other")
+}
+
+type Movie  {
+    title: ID!
+    released: Int
+    tagline: String
+    genre: Genre
+    actors: [Actor] @relation(name:"ACTED_IN",direction: IN)
+}
+
+enum Genre {
+    Action, Drama, Family, Horror, SciFi
+}
+----
+
+== Test Data
+
+[source,cypher,test-data=true]
+----
+CREATE
+  (kb:Actor:Person {name: 'Kevin Bacon', born: 1958}),
+  (mr:Actor:Person {name: 'Meg Ryan', born: 1961}),
+  (a13:Movie {title: 'Apollo 13', released: 1995, tagline: '...', genre: 'SciFi'}),
+  (matrix:Movie {title: 'The Matrix', released: 2001, tagline: 'There is no spoon'}),
+  (kb)-[:ACTED_IN]->(a13),
+  (kb)-[:ACTED_IN]->(matrix),
+  (mr)-[:ACTED_IN]->(a13),
+  (:Actor:Person {name: 'Tom Hanks', born: 1950}),
+  (:Movie {title: 'Forrest Gump'})
+----
+
+== Mutation
+
+.GraphQL-Query
+[source,graphql]
+----
+query {
+    person(name: "Kevin Bacon") {
+        born
+        ... on Actor {
+            __typename
+            namedColleagues(name: "Meg") {
+                __typename
+                ... name
+            }
+        }
+        score(value:7)
+    }
+}
+fragment name on Actor { name }
+----
+
+.GraphQL-Response
+[source,json,response=true]
+----
+{
+  "person" : [ {
+    "born" : 1958,
+    "__typename" : "Actor",
+    "namedColleagues" : [ {
+      "__typename" : "Actor",
+      "name" : "Meg Ryan"
+    } ],
+    "score" : 7
+  } ]
+}
+----
+
+.Cypher Params
+[source,json]
+----
+{
+  "personName" : "Kevin Bacon",
+  "personNamedColleaguesName" : "Meg",
+  "personNamedColleaguesValidTypes" : [ "Actor" ],
+  "personScoreValue" : 7,
+  "personValidTypes" : [ "Actor" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+WHERE person.name = $personName
+CALL {
+	WITH person
+	CALL {
+		WITH person
+		WITH $personNamedColleaguesName AS name, person AS this
+		MATCH (this)-[:ACTED_IN]->()<-[:ACTED_IN]-(other) WHERE other.name CONTAINS name RETURN other AS personNamedColleagues
+	}
+	RETURN collect(personNamedColleagues {
+		__typename: head([label IN labels(personNamedColleagues) WHERE label IN $personNamedColleaguesValidTypes]),
+		.name
+	}) AS personNamedColleagues
+}
+CALL {
+	WITH person
+	WITH person AS this, $personScoreValue AS value
+	RETURN value AS personScore LIMIT 1
+}
+RETURN person {
+	.born,
+	__typename: head([label IN labels(person) WHERE label IN $personValidTypes]),
+	namedColleagues: personNamedColleagues,
+	score: personScore
+} AS person
+----
+
+'''

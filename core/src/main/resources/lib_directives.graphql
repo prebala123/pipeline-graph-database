@@ -1,0 +1,21 @@
+directive @relation(name:String, direction: RelationDirection = OUT, from: String = "from", to: String = "to") on FIELD_DEFINITION | OBJECT
+
+directive @cypher(
+
+  # Arguments on the field are passed to the Cypher statement and can be used by name.
+  # They must not be prefixed by `$` since they are no longer parameters.
+  # Just use the same name as the fields' argument.
+  # The current node is passed to the statement as `this`.
+  # The statement should contain exactly one return expression without any alias.
+  # Input types are supported, they appear as `Map` type in your Cypher statement.
+  statement:String,
+
+  # if true, passes the sole responsibility for the nested query result for the field to your Cypher query.
+  # You will have to provide all data/structure required by client queries.
+  # Otherwise, we assume if you return object-types that you will return the appropriate nodes from your statement.
+  passThrough: Boolean = false
+) on FIELD_DEFINITION
+
+directive @property(name:String) on FIELD_DEFINITION
+directive @dynamic(prefix:String = "properties.") on FIELD_DEFINITION
+directive @ignore on FIELD_DEFINITION

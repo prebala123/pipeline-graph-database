@@ -1,0 +1,456 @@
+:toc:
+
+= Cypher Directive Test
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type Person {
+  id: ID
+  name: String @cypher(statement:"RETURN this.name")
+  age(mult:Int=13) : [Int] @cypher(statement:"RETURN this.age * mult")
+  friends: [Person] @cypher(statement:"MATCH (this)-[:KNOWS]-(o) RETURN o")
+  data: UserData @cypher(statement: "MATCH (this)-[:CREATED_MAP]->(m:Map) WITH collect({id: m.id, name: m.name}) AS mapsCreated, this RETURN {firstName: this.firstName, lastName: this.lastName, organization: this.organization, mapsCreated: mapsCreated}", passThrough:true)
+}
+type Query {
+  person : [Person]
+  p2: [Person] @cypher(statement:"MATCH (p:Person) RETURN p")
+  p3(name:String): Person @cypher(statement:"MATCH (p:Person) WHERE p.name = name RETURN p")
+  getUser(userId: ID): UserData @cypher(statement: "MATCH (u:User{id: {userId}})-[:CREATED_MAP]->(m:Map) WITH collect({id: m.id, name: m.name}) AS mapsCreated, u RETURN {firstName: u.firstName, lastName: u.lastName, organization: u.organization, mapsCreated: mapsCreated}", passThrough:true)
+}
+type Mutation {
+  createPerson(name:String): Person @cypher(statement:"CREATE (p:Person) SET p.name = name RETURN p")
+}
+
+type UserData {
+  firstName: String
+  lastName: String
+  organization: String
+  mapsCreated: [MapsCreated]
+}
+
+type MapsCreated {
+  id: String
+  name: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+----
+
+== Queries
+
+=== Simple Cypher Directive on Field
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name }}
+----
+
+.Cypher Params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	WITH person AS this
+	RETURN this.name AS personName LIMIT 1
+}
+RETURN person {
+	name: personName
+} AS person
+----
+
+'''
+
+=== render cypher query directive params args
+
+.GraphQL-Query
+[source,graphql]
+----
+query($pname:String) { p3(name:$pname) { id }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{"pname":"foo"}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "p3Name" : "foo"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	WITH $p3Name AS name
+	MATCH (p:Person) WHERE p.name = name RETURN p AS p3 LIMIT 1
+}
+RETURN p3 {
+	.id
+} AS p3
+----
+
+'''
+
+=== render cypher field directive with params defaults
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { age }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personAgeMult" : 13
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	CALL {
+		WITH person
+		WITH $personAgeMult AS mult, person AS this
+		RETURN this.age * mult AS personAge
+	}
+	RETURN collect(personAge) AS personAge
+}
+RETURN person {
+	age: personAge
+} AS person
+----
+
+'''
+
+=== render cypher query directive
+
+.GraphQL-Query
+[source,graphql]
+----
+{ p2 { id }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	MATCH (p:Person) RETURN p AS p2
+}
+RETURN p2 {
+	.id
+} AS p2
+----
+
+'''
+
+=== render cypher mutation directive
+
+.GraphQL-Query
+[source,graphql]
+----
+mutation { person: createPerson(name:"Joe") { id }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personName" : "Joe"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	WITH $personName AS name
+	CREATE (p:Person) SET p.name = name RETURN p AS person LIMIT 1
+}
+RETURN person {
+	.id
+} AS person
+----
+
+'''
+
+=== render cypher field directive with params
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { age(mult:25) }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "personAgeMult" : 25
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	CALL {
+		WITH person
+		WITH $personAgeMult AS mult, person AS this
+		RETURN this.age * mult AS personAge
+	}
+	RETURN collect(personAge) AS personAge
+}
+RETURN person {
+	age: personAge
+} AS person
+----
+
+'''
+
+=== render cypher field directive nested
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { friends { id } }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	CALL {
+		WITH person
+		WITH person AS this
+		MATCH (this)-[:KNOWS]-(o) RETURN o AS personFriends
+	}
+	RETURN collect(personFriends {
+		.id
+	}) AS personFriends
+}
+RETURN person {
+	friends: personFriends
+} AS person
+----
+
+'''
+
+=== render cypher query directive params
+
+.GraphQL-Query
+[source,graphql]
+----
+{ p3(name:"Jane") { id }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "p3Name" : "Jane"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	WITH $p3Name AS name
+	MATCH (p:Person) WHERE p.name = name RETURN p AS p3 LIMIT 1
+}
+RETURN p3 {
+	.id
+} AS p3
+----
+
+'''
+
+=== render cypher field directive scalar
+
+.GraphQL-Query
+[source,graphql]
+----
+{ person { name }}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	WITH person AS this
+	RETURN this.name AS personName LIMIT 1
+}
+RETURN person {
+	name: personName
+} AS person
+----
+
+'''
+
+=== pass through directives' result in query
+
+.GraphQL-Query
+[source,graphql]
+----
+query queriesRootQuery {
+  user: getUser(userId: "123") {
+    firstName lastName organization
+    mapsCreated { id }
+  }
+}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "userUserId" : "123"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	WITH $userUserId AS userId
+	MATCH (u:User{id: {userId}})-[:CREATED_MAP]->(m:Map) WITH collect({id: m.id, name: m.name}) AS mapsCreated, u RETURN {firstName: u.firstName, lastName: u.lastName, organization: u.organization, mapsCreated: mapsCreated} AS user LIMIT 1
+}
+RETURN user AS user
+----
+
+'''
+
+
+=== pass through directives result in field
+
+.GraphQL-Query
+[source,graphql]
+----
+query queriesRootQuery {
+  person { id, data { firstName } }
+}
+----
+
+.Query variables
+[source,json,request=true]
+----
+{}
+----
+
+.Cypher params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	WITH person AS this
+	MATCH (this)-[:CREATED_MAP]->(m:Map) WITH collect({id: m.id, name: m.name}) AS mapsCreated, this RETURN {firstName: this.firstName, lastName: this.lastName, organization: this.organization, mapsCreated: mapsCreated} AS personData LIMIT 1
+}
+RETURN person {
+	.id,
+	data: personData
+} AS person
+----
+
+'''

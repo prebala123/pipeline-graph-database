@@ -1,0 +1,17 @@
+org :
+  neo4j :
+    driver :
+      uri : neo4j+s://67051f0a.databases.neo4j.io
+      authentication :
+        username : neo4j
+        password : gIk4cTjsko7nVH7f6dAWIF0K6_bLH1bkLbcNctmLQV0
+      config :
+        encrypted : false
+database : neo4j
+spring :
+  graphql :
+    schema :
+      printer :
+        enabled : true
+    graphiql :
+      enabled : true

@@ -1,0 +1,77 @@
+:toc:
+
+= GitHub Issue #85: not-supported cypher directive with scalar result
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type Movie {
+  title: String
+  ratings: [Rated] @relation(name:"RATED")
+}
+interface Person {
+  name: String
+}
+type User implements Person {
+  name: String
+  rated(rating: Int): [Rated]
+}
+type Rated @relation(name:"RATED") {
+  from: User
+  rating: Int
+  to: Movie
+}
+type Mutation {
+  rateMovie(user:ID!, movie:ID!, rating:Int!): Int
+  @cypher(statement:"MATCH (p:Person {name: $user }),(m:Movie {title: $movie }) MERGE (p)-[r:RATED]->(m) SET r.rating= $rating RETURN r.rating")
+}
+----
+
+== Test Data
+
+[source,cypher,test-data=true]
+----
+CREATE (:User:Person{ name: 'Andreas' });
+CREATE (:Movie{ title: 'Forrest Gump' });
+----
+
+== Mutation
+
+.GraphQL-Query
+[source,graphql]
+----
+mutation {
+    r: rateMovie(movie:"Forrest Gump", user:"Andreas", rating: 5)
+}
+----
+
+.GraphQL-Response
+[source,json,response=true]
+----
+{
+  "r" : 5
+}
+----
+
+.Cypher Params
+[source,json]
+----
+{
+  "rMovie" : "Forrest Gump",
+  "rRating" : 5,
+  "rUser" : "Andreas"
+}
+----
+
+.Cypher
+[source,cypher]
+----
+CALL {
+	WITH $rMovie AS movie, $rRating AS rating, $rUser AS user
+	MATCH (p:Person {name: user }),(m:Movie {title: movie }) MERGE (p)-[r:RATED]->(m) SET r.rating= rating RETURN r.rating AS r LIMIT 1
+}
+RETURN r AS r
+----
+
+'''

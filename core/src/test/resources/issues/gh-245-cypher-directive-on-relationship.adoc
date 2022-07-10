@@ -1,0 +1,73 @@
+:toc:
+
+= Cypher Directive Computing Relationship Type To Field Test
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type Role @relation(name:"ACTED_IN", from:"actor", to:"movie") {
+   actor: Person
+   movie: Movie
+   type: String @cypher(statement:"""
+     RETURN type(this)
+     """)
+}
+
+type Person {
+  name: String
+  born: Int
+  roles: [Role]
+}
+
+type Movie {
+  title: String
+  released: Int
+  characters: [Role]
+}
+----
+
+== Queries
+
+=== Simple Cypher Directive on Field
+
+.GraphQL-Query
+[source,graphql]
+----
+query {
+  person {
+    roles {
+      type
+    }
+  }
+}
+----
+
+.Cypher Params
+[source,json]
+----
+{}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (person:Person)
+CALL {
+	WITH person
+	MATCH (person)-[personRoles:ACTED_IN]->(personRolesMovie:Movie)
+	CALL {
+		WITH personRoles
+		WITH personRoles AS this
+		RETURN type(this) AS personRolesType LIMIT 1
+	}
+	RETURN collect(personRoles {
+		type: personRolesType
+	}) AS personRoles
+}
+RETURN person {
+	roles: personRoles
+} AS person
+----
+
+'''

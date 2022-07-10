@@ -1,0 +1,29 @@
+name: build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    name: Build Neo4j Graphql Java
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Setup Java JDK
+        uses: actions/setup-java@v2.0.0
+        with:
+          java-version: 11
+          distribution: adopt
+      - name: Run Maven build
+        run:  ./mvnw --no-transfer-progress -Dneo4j-graphql-java.integration-tests=true -Dneo4j-graphql-java.generate-test-file-diff=false -Dneo4j-graphql-java.flatten-tests=true clean compile test
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          files: "**/target/surefire-reports/*.xml"
+          report_individual_runs: "true"

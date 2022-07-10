@@ -1,0 +1,126 @@
+:toc:
+
+= Translator Tests
+
+== Schema
+
+[source,graphql,schema=true]
+----
+type User {
+  name:String
+  referredBy: Referral @relation(direction: OUT)
+  referred:[Referral] @relation(direction: IN)
+}
+type Referral @relation (name:"REFERRED_BY", from:"referredBy", to: "user", direction: IN ) {
+  user:User
+  referredBy:User
+  referralDate:String
+}
+----
+
+== Test Data
+
+[source,cypher,test-data=true]
+----
+CREATE
+  (u1:User {name: 'Max'}),
+  (u2:User {name: 'Marie'}),
+  (u3:User {name: 'Thomas'}),
+  (u4:User {name: 'Jane'}),
+  (u1)-[:REFERRED_BY{referralDate: "2021-01-01"}]->(u3),
+  (u2)-[:REFERRED_BY{referralDate: "2021-01-02"}]->(u3),
+  (u3)-[:REFERRED_BY{referralDate: "2021-01-03"}]->(u4)
+----
+
+== Tests
+
+=== relation with same types changed direction
+
+.GraphQL-Query
+[source,graphql]
+----
+{user( filter: {name_in: ["Jane", "Thomas"]}) {
+  name
+  referredBy { referralDate referredBy {name} }
+  referred(orderBy: [referralDate_desc]) { referralDate user {name} }
+} }
+----
+
+.GraphQL-Response
+[source,json,response=true]
+----
+{
+  "user" : [ {
+    "name" : "Thomas",
+    "referredBy" : {
+      "referralDate" : "2021-01-03",
+      "referredBy" : {
+        "name" : "Jane"
+      }
+    },
+    "referred" : [ {
+      "referralDate" : "2021-01-02",
+      "user" : {
+        "name" : "Marie"
+      }
+    }, {
+      "referralDate" : "2021-01-01",
+      "user" : {
+        "name" : "Max"
+      }
+    } ]
+  }, {
+    "name" : "Jane",
+    "referredBy" : null,
+    "referred" : [ {
+      "referralDate" : "2021-01-03",
+      "user" : {
+        "name" : "Thomas"
+      }
+    } ]
+  } ]
+}
+----
+
+.Cypher params
+[source,json]
+----
+{
+  "filterUserNameIn" : [ "Jane", "Thomas" ]
+}
+----
+
+.Cypher
+[source,cypher]
+----
+MATCH (user:User)
+WHERE user.name IN $filterUserNameIn
+CALL {
+	WITH user
+	OPTIONAL MATCH (user)-[userReferredBy:REFERRED_BY]->(userReferredByReferredBy:User)
+	RETURN userReferredBy {
+		.referralDate,
+		referredBy: userReferredByReferredBy {
+			.name
+		}
+	} AS userReferredBy LIMIT 1
+}
+CALL {
+	WITH user
+	MATCH (user)<-[userReferred:REFERRED_BY]-(userReferredUser:User)
+	WITH userReferredUser, userReferred ORDER BY userReferred.referralDate DESC
+	RETURN collect(userReferred {
+		.referralDate,
+		user: userReferredUser {
+			.name
+		}
+	}) AS userReferred
+}
+RETURN user {
+	.name,
+	referredBy: userReferredBy,
+	referred: userReferred
+} AS user
+----
+
+'''

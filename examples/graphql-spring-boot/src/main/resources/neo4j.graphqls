@@ -1,0 +1,23 @@
+type Movie {
+  title: String
+  released: Int
+  tagline: String
+  cast: [Person] @relation(name: "ACTED_IN", direction:IN)
+  directors: [Person] @relation(name: "DIRECTED", direction:IN)
+  writers: [Person] @relation(name: "WROTE", direction:IN)
+  producers: [Person] @relation(name: "PRODUCED", direction:IN)
+  critics: [Person] @relation(name: "REVIEWED", direction:IN)
+}
+
+type Person {
+  name: String
+  born: Int
+  followers: [Person] @relation(name: "FOLLOWS", direction:IN)
+  follows: [Person] @relation(name: "FOLLOWS", direction:OUT)
+  history: [Movie] @relation(direction:OUT)
+}
+
+type Query {
+  movies: [Movie]
+  people: [Person]
+}

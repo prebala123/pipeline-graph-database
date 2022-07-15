@@ -1,3 +1,48 @@
+type Pipeline {
+    id: String
+    stages: [Stages]
+}
+
+type Stages {
+    refId: String
+    requisiteStageRefIds: [String]
+}
+
+input PipelineInput {
+    id: String
+}
+
+input StagesInput {
+    refId: String
+}
+
+input StagesRelationshipInput {
+    s1: String
+    s2: String
+}
+
+type Mutation {
+    createPipeline(input: PipelineInput): Pipeline @cypher(statement:
+    "MERGE (p:Pipeline { id: input.id}) RETURN p")
+    createStages(input: StagesInput): Stages @cypher(statement:
+    "MERGE (s:Stages { refId: input.refId}) RETURN s")
+    createStageTimeline(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 type Movie {
   title: String
   released: Int
@@ -7,6 +52,7 @@ type Movie {
   writers: [Person] @relation(name: "WROTE", direction:IN)
   producers: [Person] @relation(name: "PRODUCED", direction:IN)
   critics: [Person] @relation(name: "REVIEWED", direction:IN)
+    people: [Person] @relation(direction:IN)
 }
 
 type Person {
@@ -21,3 +67,25 @@ type Query {
   movies: [Movie]
   people: [Person]
 }
+
+input MovieCreateInput {
+    title: String!
+    released: Int
+    tagline: String
+}
+
+input PersonCreateInput {
+    name: String!
+    born: Int
+}
+
+input RelationshipCreateInput {
+    start: PersonCreateInput
+    end: MovieCreateInput
+}
+
+type RelationshipCreateOutput {
+    person: [Person] @relation @cypher(statement: "MERGE (p:Person) RETURN p")
+    movie: [Movie] @relation @cypher(statement: "MERGE (m:Movie) RETURN m")
+}
+

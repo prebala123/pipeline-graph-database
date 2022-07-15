@@ -62,23 +62,33 @@ public class SendRequest {
         JSONArray stages = jo2.getJSONArray("stages");
         for (int i = 0; i < stages.length(); i++) {
             String id = (String) stages.getJSONObject(i).get("refId");
-            System.out.println(stages.getJSONObject(i).get("requisiteStageRefIds"));
-            JSONArray temp = (JSONArray) stages.getJSONObject(i).get("requisiteStageRefIds");
-            /*String[] prevs = (String[]) stages.getJSONObject(i).get("requisiteStageRefIds");
-            for (int j = 0; j < prevs.length; j++) {
+            JSONArray prevs = (JSONArray) stages.getJSONObject(i).get("requisiteStageRefIds");
+            if (prevs.length() == 0) {
                 String mutation = "mutation {\n" +
-                        "  createStageTimeline(input: {s1: \""+id+"\", s2: \""+prevs[j]+"\"}) {\n" +
+                        "  createStagePipeline(input: {s1: \""+jo2.get("id")+"\", s2: \""+id+"\"}) {\n" +
                         "    refId\n" +
                         "  }\n" +
                         "}";
-                System.out.println(mutation);
                 JSONObject jo = new JSONObject();
                 jo.put("query", mutation);
                 try {
                     whenSendPostRequest_thenCorrect(jo);
                 } catch (IOException ignored) {
                 }
-            }*/
+            }
+            for (int j = 0; j < prevs.length(); j++) {
+                String mutation = "mutation {\n" +
+                        "  createStageTimeline(input: {s1: \""+prevs.get(j)+"\", s2: \""+id+"\"}) {\n" +
+                        "    refId\n" +
+                        "  }\n" +
+                        "}";
+                JSONObject jo = new JSONObject();
+                jo.put("query", mutation);
+                try {
+                    whenSendPostRequest_thenCorrect(jo);
+                } catch (IOException ignored) {
+                }
+            }
         }
     }
 
@@ -90,18 +100,14 @@ public class SendRequest {
             String allJson = "";
             while (myReader.hasNextLine()) {
                 String data = myReader.nextLine();
-                //System.out.println(data);
                 allJson += data;
             }
-            //allJson += "]}";
-            //System.out.println(allJson);
             jo = new JSONObject(allJson);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
         }
-        //System.out.println(jo);
         return jo;
     }
 
@@ -126,12 +132,6 @@ public class SendRequest {
         final MediaType JSON
                 = MediaType.parse("application/json; charset=utf-8");
 
-        //String queryjson = "{\"query\":\"query {\n  movies {\n    title\n  }\n}\"}";
-        //System.out.println(queryjson);
-
-        //JSONObject jo = new JSONObject();
-        //jo.put("query", "query {\n  movies {\n    title\n  }\n}");
-
         RequestBody postBody = RequestBody.create(jo.toString(), JSON);
         Request request = new Request.Builder()
                 .url("http://localhost:8080/graphql")
@@ -142,16 +142,9 @@ public class SendRequest {
         OkHttpClient client = new OkHttpClient();
         Call call = client.newCall(request);
         Response response = call.execute();
-        //System.out.println(response.body().string());
+
 
         JSONObject results = new JSONObject(response.body().string());
         return results;
-        //System.out.println(results.getJSONObject("data").getJSONArray("movies"));
-        /*JSONArray data = results.getJSONObject("data").getJSONArray("movies");
-        for (int i = 0; i < data.length(); i++) {
-            System.out.println(data.getJSONObject(i).get("title"));
-        }*/
-
-        //assertThat(response.code(), equalTo(200));
     }
 }

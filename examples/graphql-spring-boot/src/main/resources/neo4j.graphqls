@@ -28,6 +28,8 @@ type Mutation {
     "MERGE (s:Stages { refId: input.refId}) RETURN s")
     createStageTimeline(input: StagesRelationshipInput): Stages @cypher(statement:
     "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+    createStagePipeline(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Pipeline { id: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
 }
 
 

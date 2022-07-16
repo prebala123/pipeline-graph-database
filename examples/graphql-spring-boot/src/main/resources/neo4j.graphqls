@@ -8,12 +8,34 @@ type Stages {
     requisiteStageRefIds: [String]
 }
 
+type Trigger {
+    executionId: String
+}
+
+type Outputs {
+    JobNumber: String
+}
+
 input PipelineInput {
     id: String
 }
 
+input TriggerInput {
+    executionId: String
+}
+
 input StagesInput {
     refId: String
+}
+
+input OutputsInput {
+    Buildnumber: String
+    GitBranch: String
+    GitRepo: String
+    JobNumber: String
+    artifacts: [String]
+    canaryimage: String
+    startTime: Int
 }
 
 input StagesRelationshipInput {
@@ -24,12 +46,21 @@ input StagesRelationshipInput {
 type Mutation {
     createPipeline(input: PipelineInput): Pipeline @cypher(statement:
     "MERGE (p:Pipeline { id: input.id}) RETURN p")
+    createTrigger(input: TriggerInput): Trigger @cypher(statement:
+    "MERGE (t:Trigger { executionId: input.executionId}) RETURN t")
     createStages(input: StagesInput): Stages @cypher(statement:
     "MERGE (s:Stages { refId: input.refId}) RETURN s")
+    createOutputs(input: OutputsInput): Outputs @cypher(statement:
+    "MERGE (o:Outputs { JobNumber: input.JobNumber}) RETURN o")
+
     createStageTimeline(input: StagesRelationshipInput): Stages @cypher(statement:
     "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
-    createStagePipeline(input: StagesRelationshipInput): Stages @cypher(statement:
-    "MERGE (s1:Pipeline { id: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+    createStageTrigger(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Trigger { executionId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+    createPipelineTrigger(input: StagesRelationshipInput): Pipeline @cypher(statement:
+    "MERGE (s1:Trigger { executionId: input.s1}) MERGE (s2:Pipeline {id: input.s2}) MERGE (s2) - [:NEXT] -> (s1) RETURN s2")
+    createStageOutputs(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Outputs { JobNumber: input.s2}) MERGE (s1) - [:OUTPUTS] -> (s2) RETURN s1")
 }
 
 

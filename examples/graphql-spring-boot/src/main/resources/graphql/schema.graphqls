@@ -1,4 +1,4 @@
-extend type Movie {
+extend type Pipeline {
     bar: String @ignore
     javaData: [JavaData!] @ignore
 }

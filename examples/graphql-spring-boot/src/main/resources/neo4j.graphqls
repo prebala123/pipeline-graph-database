@@ -1,20 +1,4 @@
-type Pipeline {
-    id: String
-    stages: [Stages]
-}
 
-type Stages {
-    refId: String
-    requisiteStageRefIds: [String]
-}
-
-type Trigger {
-    executionId: String
-}
-
-type Outputs {
-    JobNumber: String
-}
 
 input PipelineInput {
     id: String
@@ -86,39 +70,158 @@ type Movie {
   producers: [Person] @relation(name: "PRODUCED", direction:IN)
   critics: [Person] @relation(name: "REVIEWED", direction:IN)
     people: [Person] @relation(direction:IN)
+
+type Pipelinefailed { text: String }
+
+type Pipelinestarting { text: String }
+
+type Pipelinecomplete { text: String }
+
+type Message
+{ pipelinefailed: Pipelinefailed
+    pipelinestarting: Pipelinestarting
+    pipelinecomplete: Pipelinecomplete
 }
 
-type Person {
-  name: String
-  born: Int
-  followers: [Person] @relation(name: "FOLLOWS", direction:IN)
-  follows: [Person] @relation(name: "FOLLOWS", direction:OUT)
-  history: [Movie] @relation(direction:OUT)
+type Notifications { address: String
+    level: String
+    type: String
+    when: [String]
+    message: Message }
+
+type Trigger { type: String
+    user: String
+    rebake: Boolean
+    dryRun: Boolean
+    strategy: Boolean
+    executionId: String
+    eventId: String
+    enabled: Boolean
+    preferred: Boolean
+    expectedArtifacts: [String ]
+    resolvedExpectedArtifacts: [String]
+    notifications: [String ]
+    artifacts: [String ]
+    NextStage: [Stages] @relation(name: "NEXT_STAGE", direction:OUT)
+
 }
 
-type Query {
-  movies: [Movie]
-  people: [Person]
+type Authentication {
+    user: String allowedAccounts: [String]
+
 }
 
-input MovieCreateInput {
-    title: String!
-    released: Int
-    tagline: String
+type Tasks { id: String
+    implementingClass: String
+    name: String
+    startTime: Int
+    endTime: Int
+    status: String
+    stageStart: Boolean
+    stageEnd: Boolean
+    loopStart: Boolean
+    loopEnd: Boolean
 }
 
-input PersonCreateInput {
-    name: String!
-    born: Int
+type PropertyFileContents { GitRepo: String
+    Buildnumber: String
+    GitBranch: String
+    JobNumber: String }
+
+type Scm { name: String
+    branch: String
+    sha1: String
+    remoteUrl: String
 }
 
-input RelationshipCreateInput {
-    start: PersonCreateInput
-    end: MovieCreateInput
+type Artifacts {
+    fileName: String
+    displayPath: String
+    relativePath: String
+    reference: String
+    name: String
+    type: String
+    version: String
+    decorated: Boolean
+
 }
 
-type RelationshipCreateOutput {
-    person: [Person] @relation @cypher(statement: "MERGE (p:Person) RETURN p")
-    movie: [Movie] @relation @cypher(statement: "MERGE (m:Movie) RETURN m")
+type BuildInfo {
+    building: Boolean
+    fullDisplayName: String
+    name: String
+    number: Int
+    duration: Int
+    timestamp: String
+    result: String
+    url: String
+    id: String
+    scm: [Scm] @relation(name: "SUPPLY_CHAIN_MANAGEMENT", direction:IN)
+    artifacts: [Artifacts] @relation(name: "ARTIFACTS", direction:IN)
 }
+
+type Outputs {
+    Buildnumber: String
+    GitBranch: String
+    GitRepo: String
+    JobNumber: String
+    artifacts: [String ]
+    propertyFileContents: PropertyFileContents @relation(name: "GIT_INFO", direction:IN)
+    buildInfo: BuildInfo @relation(name: "INFORMS_ABOUT", direction:IN)
+}
+
+type Context {
+    propertyFile: String
+    consecutiveErrors: Int
+    queuedBuild: String
+    Buildnumber: String
+    GitBranch: String
+    buildNumber: Int
+    JobNumber: String
+    master: String
+    GitRepo: String
+    failPipeline: Boolean
+    job: String
+    continuePipeline: Boolean
+    propertyFileContents: PropertyFileContents @relation(name: "GIT_INFO", direction:IN)
+    buildInfo: BuildInfo @relation(name: "INFORMS_ABOUT", direction:IN)
+}
+
+type Stages {
+    id: String
+    refId: String
+    type: String
+    name: String
+    startTime: Int
+    endTime: Int
+    status: String
+    requisiteStageRefIds: [String ]
+    tasks: [Tasks] @relation(name: "REQUIRED_TASKS", direction:IN)
+   outputs: Outputs @relation(name: "OUTPUTS", direction:OUT)
+    context: Context @relation(name: "CONTEXTUALIZES", direction:IN)
+    NextStage: [Stages] @relation(name: "NEXT_STAGE", direction:OUT)
+}
+
+type Pipeline {
+    type: String
+    id: String
+    application: String
+    name: String
+    buildTime: Int
+    canceled: Boolean
+    limitConcurrent: Boolean
+    keepWaitingPipelines: Boolean
+    startTime: Int
+    endTime: Int
+    status: String
+    origin: String
+    pipelineConfigId: String
+    spelEvaluator: String
+    systemNotifications: [String ]
+    notifications: [Notifications] @relation(name: "NOTIFIES", direction:IN)
+    trigger: Trigger @relation(name: "TRIGGERS", direction:IN)
+    authentication: Authentication @relation(name: "AUTHENTICATES", direction:IN)
+    stages: [Stages] @relation(name: "STAGES", direction:IN)
+}
+
 

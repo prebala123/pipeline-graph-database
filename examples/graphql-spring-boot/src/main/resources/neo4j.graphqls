@@ -1,5 +1,4 @@
 
-
 input PipelineInput {
     id: String
 }
@@ -60,16 +59,7 @@ type Mutation {
 
 
 
-type Movie {
-  title: String
-  released: Int
-  tagline: String
-  cast: [Person] @relation(name: "ACTED_IN", direction:IN)
-  directors: [Person] @relation(name: "DIRECTED", direction:IN)
-  writers: [Person] @relation(name: "WROTE", direction:IN)
-  producers: [Person] @relation(name: "PRODUCED", direction:IN)
-  critics: [Person] @relation(name: "REVIEWED", direction:IN)
-    people: [Person] @relation(direction:IN)
+
 
 type Pipelinefailed { text: String }
 
@@ -77,8 +67,8 @@ type Pipelinestarting { text: String }
 
 type Pipelinecomplete { text: String }
 
-type Message
-{ pipelinefailed: Pipelinefailed
+type Message {
+    pipelinefailed: Pipelinefailed
     pipelinestarting: Pipelinestarting
     pipelinecomplete: Pipelinecomplete
 }
@@ -89,7 +79,8 @@ type Notifications { address: String
     when: [String]
     message: Message }
 
-type Trigger { type: String
+type Trigger {
+    type: String
     user: String
     rebake: Boolean
     dryRun: Boolean
@@ -111,7 +102,8 @@ type Authentication {
 
 }
 
-type Tasks { id: String
+type Tasks {
+    id: String
     implementingClass: String
     name: String
     startTime: Int
@@ -123,12 +115,14 @@ type Tasks { id: String
     loopEnd: Boolean
 }
 
-type PropertyFileContents { GitRepo: String
+type PropertyFileContents {
+    GitRepo: String
     Buildnumber: String
     GitBranch: String
     JobNumber: String }
 
-type Scm { name: String
+type Scm {
+    name: String
     branch: String
     sha1: String
     remoteUrl: String

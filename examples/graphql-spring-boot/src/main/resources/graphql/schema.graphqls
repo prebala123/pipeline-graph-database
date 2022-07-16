@@ -10,3 +10,4 @@ type JavaData {
 extend type Query {
     other: String
 }
+

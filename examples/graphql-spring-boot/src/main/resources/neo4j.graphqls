@@ -1,3 +1,76 @@
+
+
+input PipelineInput {
+    id: String
+}
+
+input TriggerInput {
+    executionId: String
+}
+
+input StagesInput {
+    refId: String
+}
+
+input OutputsInput {
+    Buildnumber: String
+    GitBranch: String
+    GitRepo: String
+    JobNumber: String
+    artifacts: [String]
+    canaryimage: String
+    startTime: Int
+}
+
+input StagesRelationshipInput {
+    s1: String
+    s2: String
+}
+
+type Mutation {
+    createPipeline(input: PipelineInput): Pipeline @cypher(statement:
+    "MERGE (p:Pipeline { id: input.id}) RETURN p")
+    createTrigger(input: TriggerInput): Trigger @cypher(statement:
+    "MERGE (t:Trigger { executionId: input.executionId}) RETURN t")
+    createStages(input: StagesInput): Stages @cypher(statement:
+    "MERGE (s:Stages { refId: input.refId}) RETURN s")
+    createOutputs(input: OutputsInput): Outputs @cypher(statement:
+    "MERGE (o:Outputs { JobNumber: input.JobNumber}) RETURN o")
+
+    createStageTimeline(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+    createStageTrigger(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Trigger { executionId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+    createPipelineTrigger(input: StagesRelationshipInput): Pipeline @cypher(statement:
+    "MERGE (s1:Trigger { executionId: input.s1}) MERGE (s2:Pipeline {id: input.s2}) MERGE (s2) - [:NEXT] -> (s1) RETURN s2")
+    createStageOutputs(input: StagesRelationshipInput): Stages @cypher(statement:
+    "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Outputs { JobNumber: input.s2}) MERGE (s1) - [:OUTPUTS] -> (s2) RETURN s1")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+type Movie {
+  title: String
+  released: Int
+  tagline: String
+  cast: [Person] @relation(name: "ACTED_IN", direction:IN)
+  directors: [Person] @relation(name: "DIRECTED", direction:IN)
+  writers: [Person] @relation(name: "WROTE", direction:IN)
+  producers: [Person] @relation(name: "PRODUCED", direction:IN)
+  critics: [Person] @relation(name: "REVIEWED", direction:IN)
+    people: [Person] @relation(direction:IN)
+
 type Pipelinefailed { text: String }
 
 type Pipelinestarting { text: String }
@@ -55,15 +128,13 @@ type PropertyFileContents { GitRepo: String
     GitBranch: String
     JobNumber: String }
 
-type Scm
-{ name: String
+type Scm { name: String
     branch: String
     sha1: String
     remoteUrl: String
 }
 
-type Artifacts
-{
+type Artifacts {
     fileName: String
     displayPath: String
     relativePath: String
@@ -153,10 +224,4 @@ type Pipeline {
     stages: [Stages] @relation(name: "STAGES", direction:IN)
 }
 
-type Query{
-}
-
-type Mutation{
-}
-}
 

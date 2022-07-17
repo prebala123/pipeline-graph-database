@@ -1,7 +1,18 @@
-
-
 input PipelineInput {
+  type: String
   id: String
+  application: String
+  name: String
+  buildTime: Float
+  canceled: Boolean
+  limitConcurrent: Boolean
+  keepWaitingPipelines: Boolean
+  startTime: Float
+  endTime: Float
+  status: String
+  origin: String
+  pipelineConfigId: String
+  spelEvaluator: String
 }
 
 input TriggerInput {
@@ -9,7 +20,13 @@ input TriggerInput {
 }
 
 input StagesInput {
+  id: String
   refId: String
+  type: String
+  name: String
+  startTime: Float
+  endTime: Float
+  status: String
 }
 
 input OutputsInput {
@@ -29,11 +46,15 @@ input StagesRelationshipInput {
 
 type Mutation {
   createPipeline(input: PipelineInput): Pipeline @cypher(statement:
-  "MERGE (p:Pipeline { id: input.id}) RETURN p")
+  """MERGE (p:Pipeline {type: input.type, id: input.id, application: input.application, name: input.name,
+  buildTime: input.buildTime, canceled: input.canceled, limitConcurrent: input.limitConcurrent,
+  keepWaitingPipelines: input.keepWaitingPipelines, startTime: input.startTime, endTime: input.endTime, status: input.status,
+  origin: input.origin, pipelineConfigId: input.pipelineConfigId, spelEvaluator: input.spelEvaluator}) RETURN p""")
   createTrigger(input: TriggerInput): Trigger @cypher(statement:
   "MERGE (t:Trigger { executionId: input.executionId}) RETURN t")
   createStages(input: StagesInput): Stages @cypher(statement:
-  "MERGE (s:Stages { refId: input.refId}) RETURN s")
+  """MERGE (s:Stages {id: input.id, refId: input.refId, type: input.type, name: input.name,
+  startTime: input.startTime, endTime: input.endTime, status: input.status}) RETURN s""")
   createOutputs(input: OutputsInput): Outputs @cypher(statement:
   "MERGE (o:Outputs { JobNumber: input.JobNumber}) RETURN o")
 
@@ -47,7 +68,9 @@ type Mutation {
   "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Outputs { JobNumber: input.s2}) MERGE (s1) - [:OUTPUTS] -> (s2) RETURN s1")
 }
 
-
+type Query {
+  stages: [Stages]
+}
 
 
 
@@ -160,7 +183,7 @@ type Outputs {
   GitBranch: String
   GitRepo: String
   JobNumber: String
-  artifacts: [String ]
+  artifacts: [String]
   propertyFileContents: PropertyFileContents @relation(name: "GIT_INFO", direction:IN)
   buildInfo: BuildInfo @relation(name: "INFORMS_ABOUT", direction:IN)
 }

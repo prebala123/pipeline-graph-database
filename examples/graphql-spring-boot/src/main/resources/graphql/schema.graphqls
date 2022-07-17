@@ -7,7 +7,3 @@ type JavaData {
     name: String
 }
 
-extend type Query {
-    other: String
-}
-

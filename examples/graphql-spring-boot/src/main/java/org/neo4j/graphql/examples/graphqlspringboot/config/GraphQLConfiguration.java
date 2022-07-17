@@ -21,7 +21,7 @@ import java.util.List;
 @Configuration
 public class GraphQLConfiguration {
 
-    @Value("classpath:neo4j.graphqls")
+    @Value("classpath:neo4j.graphql")
     public Resource graphQl;
 
     @Autowired(required = false)

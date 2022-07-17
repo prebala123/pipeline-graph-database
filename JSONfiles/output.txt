@@ -1,8 +1,0 @@
-{"data": {"movies": [{"cast": [
-    {"name": "Kelly McGillis"},
-    {"name": "Tom Skerritt"},
-    {"name": "Meg Ryan"},
-    {"name": "Anthony Edwards"},
-    {"name": "Val Kilmer"},
-    {"name": "Tom Cruise"}
-]}]}}

@@ -1,13 +1,9 @@
-extend type Movie {
+extend type Pipeline {
     bar: String @ignore
     javaData: [JavaData!] @ignore
 }
 
 type JavaData {
     name: String
-}
-
-extend type Query {
-    other: String
 }
 

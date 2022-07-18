@@ -54,10 +54,7 @@ public class SendRequest {
                 "}";
         JSONObject jo = new JSONObject();
         jo.put("query", mutation);
-        try {
-            whenSendPostRequest_thenCorrect(jo);
-        }
-        catch (IOException ignored) {}
+        whenSendPostRequest_thenCorrect(jo);
     }
 
     public static void addTrigger(JSONObject jo2) {
@@ -69,10 +66,7 @@ public class SendRequest {
                 "}";
         JSONObject jo = new JSONObject();
         jo.put("query", mutation);
-        try {
-            whenSendPostRequest_thenCorrect(jo);
-        }
-        catch (IOException ignored) {}
+        whenSendPostRequest_thenCorrect(jo);
 
         String id2 = (String) jo2.get("id");
         mutation = "mutation {\n" +
@@ -82,10 +76,7 @@ public class SendRequest {
                 "}";
         jo = new JSONObject();
         jo.put("query", mutation);
-        try {
-            whenSendPostRequest_thenCorrect(jo);
-        }
-        catch (IOException ignored) {}
+        whenSendPostRequest_thenCorrect(jo);
     }
 
     public static void addStages(JSONObject jo2) {
@@ -114,11 +105,8 @@ public class SendRequest {
                     "}";
             JSONObject jo = new JSONObject();
             jo.put("query", mutation);
-            try {
-                whenSendPostRequest_thenCorrect(jo);
-            } catch (IOException ignored) {
-            }
-            addOutputs(stages.getJSONObject(i), id);
+            whenSendPostRequest_thenCorrect(jo);
+            addOutputs(stages.getJSONObject(i).getJSONObject("outputs"), id);
         }
     }
 
@@ -135,10 +123,7 @@ public class SendRequest {
                         "}";
                 JSONObject jo = new JSONObject();
                 jo.put("query", mutation);
-                try {
-                    whenSendPostRequest_thenCorrect(jo);
-                } catch (IOException ignored) {
-                }
+                whenSendPostRequest_thenCorrect(jo);
             }
             for (int j = 0; j < prevs.length(); j++) {
                 String mutation = "mutation {\n" +
@@ -148,50 +133,89 @@ public class SendRequest {
                         "}";
                 JSONObject jo = new JSONObject();
                 jo.put("query", mutation);
-                try {
-                    whenSendPostRequest_thenCorrect(jo);
-                } catch (IOException ignored) {
-                }
+                whenSendPostRequest_thenCorrect(jo);
             }
         }
     }
 
     public static void addOutputs(JSONObject jo2, String id) {
-        String jobNumber = "unknown";
-        try {
-            jobNumber = (String) jo2.getJSONObject("outputs").get("JobNumber");
-        } catch (JSONException ignored) {
-
-        }
-        //System.out.println(jo2.getJSONObject("outputs").keySet());
-        if (!jobNumber.equals("unknown")) {
-            String mutation = "mutation {\n" +
-                    "  createOutputs(input: {JobNumber: \"" + jobNumber + "\"}) {\n" +
-                    "    JobNumber\n" +
-                    "  }\n" +
-                    "}";
-            JSONObject jo = new JSONObject();
-            jo.put("query", mutation);
-            try {
-                whenSendPostRequest_thenCorrect(jo);
-            } catch (IOException ignored) {
+        //gets all fields of the object
+        Iterator<String> it = jo2.keys();
+        ArrayList<String> lst = new ArrayList<>();
+        //iterates through fields
+        while (it.hasNext()) {
+            String k = it.next();
+            //unhandled fields for now
+            if (k.equals("buildInfo") || k.equals("propertyFileContents")
+                    || k.equals("outputs.manifestNamesByNamespace")
+                    || k.equals("manifests")
+                    || k.equals("outputs.manifests") || k.equals("manifest")
+                    || k.equals("resolvedExpectedArtifacts") || k.equals("jobStatus") || k.equals("completionDetails")
+                    || k.equals("trigger_json")) {
+                continue;
             }
-            connectOutputs(jobNumber, id);
+            //artifact outputs
+            else if (k.equals("outputs.createdArtifacts") || k.equals("outputs.boundArtifacts")
+                    || k.equals("optionalArtifacts")  || k.equals("artifacts") || k.equals("requiredArtifacts")) {
+                JSONArray artifacts = jo2.getJSONArray(k);
+                k = k.replace("outputs.", "");
+                //go to addArtifacts for code
+                for (int i = 0; i < artifacts.length(); i++)
+                    addArtifacts(artifacts.getJSONObject(i), id, k);
+            }
+            //non String fields
+            else if (k.equals("startTime") || k.equals("overallScore")) {
+                lst.add(k+": "+jo2.get(k)+"");
+            }
+            //String fields
+            else {
+                lst.add(k + ": \"" + jo2.get(k) + "\"");
+            }
         }
-    }
-
-    public static void connectOutputs(String jobNumber, String id) {
+        lst.add("refId: \"" + id + "\"");
+        String fields = String.join(", ", lst);
+        //creates graphql mutation
         String mutation = "mutation {\n" +
-                "  createStageOutputs(input: {s1: \""+id+"\", s2: \""+jobNumber+"\"}) {\n" +
-                "    refId\n" +
+                "  createOutputs(input: {" + fields + "}) {\n" +
+                "    __typename\n" +
                 "  }\n" +
                 "}";
         JSONObject jo = new JSONObject();
         jo.put("query", mutation);
-        try {
-            whenSendPostRequest_thenCorrect(jo);
+        whenSendPostRequest_thenCorrect(jo);
+    }
+
+    public static void addArtifacts(JSONObject jo2, String id, String type) {
+        //gets fields of the artifact
+        Iterator<String> it = jo2.keys();
+        ArrayList<String> lst = new ArrayList<>();
+        //iterates through fields
+        while (it.hasNext()) {
+            String k = it.next();
+            //incomplete for now
+            if (k.equals("metadata")) {
+                continue;
+            }
+            //non String type
+            else if (k.equals("customKind")) {
+                lst.add(k+": "+jo2.get(k)+"");
+            }
+            //String type
+            else {
+                lst.add(k + ": \"" + jo2.get(k) + "\"");
+            }
         }
-        catch (IOException ignored) {}
+        lst.add("refId: \"" + id + "\"");
+        String fields = String.join(", ", lst);
+        //mutation changes based on type of artifact
+        String mutation = "mutation {\n" +
+                "  "+type+"(input: {" + fields + "}) {\n" +
+                "    __typename\n" +
+                "  }\n" +
+                "}";
+        JSONObject jo = new JSONObject();
+        jo.put("query", mutation);
+        whenSendPostRequest_thenCorrect(jo);
     }
 
     public static JSONObject readJSON() {
@@ -221,7 +245,7 @@ public class SendRequest {
             JSONObject results = whenSendPostRequest_thenCorrect(jo);
             //System.out.println(results);
             //results.write(out);
-            out.write(results.toString(4));
+            //out.write(results.toString(4));
         }
         catch (IOException ignored) {
 
@@ -242,25 +266,27 @@ public class SendRequest {
         }
     }
 
-    public static JSONObject whenSendPostRequest_thenCorrect(JSONObject jo)
-            throws IOException {
+    public static JSONObject whenSendPostRequest_thenCorrect(JSONObject jo) {
+        try {
+            final MediaType JSON
+                    = MediaType.parse("application/json; charset=utf-8");
 
-        final MediaType JSON
-                = MediaType.parse("application/json; charset=utf-8");
+            RequestBody postBody = RequestBody.create(jo.toString(), JSON);
+            Request request = new Request.Builder()
+                    .url("http://localhost:8080/graphql")
+                    .addHeader("Content-Type", "application/json")
+                    .post(postBody)
+                    .build();
 
-        RequestBody postBody = RequestBody.create(jo.toString(), JSON);
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/graphql")
-                .addHeader("Content-Type", "application/json")
-                .post(postBody)
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-        Call call = client.newCall(request);
-        Response response = call.execute();
+            OkHttpClient client = new OkHttpClient();
+            Call call = client.newCall(request);
+            Response response = call.execute();
 
 
-        JSONObject results = new JSONObject(response.body().string());
-        return results;
+            JSONObject results = new JSONObject(response.body().string());
+            return results;
+        } catch (IOException e) {
+            return null;
+        }
     }
 }

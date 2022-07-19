@@ -15,8 +15,28 @@ input PipelineInput {
   spelEvaluator: String
 }
 
+input NotificationsInput {
+  id: String
+  address: String
+  level: String
+  type: String
+  when: [String]
+}
+
 input TriggerInput {
+  type: String
+  user: String
+  rebake: Boolean
+  dryRun: Boolean
+  strategy: Boolean
   executionId: String
+  eventId: String
+  enabled: Boolean
+  preferred: Boolean
+  expectedArtifacts: [String ]
+  resolvedExpectedArtifacts: [String]
+  notifications: [String ]
+  artifacts: [String ]
 }
 
 input ContextInput{
@@ -79,6 +99,11 @@ input ArtifactInput {
   reference: String
   name: String
   artifactAccount: String
+  account: String
+}
+
+input MetadataInput {
+  account: String
 }
 
 input StagesRelationshipInput {
@@ -99,7 +124,12 @@ type Mutation {
   keepWaitingPipelines: input.keepWaitingPipelines, startTime: input.startTime, endTime: input.endTime, status: input.status,
   origin: input.origin, pipelineConfigId: input.pipelineConfigId, spelEvaluator: input.spelEvaluator}) RETURN p""")
   createTrigger(input: TriggerInput): Trigger @cypher(statement:
-  "MERGE (t:Trigger { executionId: input.executionId}) RETURN t")
+  """MERGE (t:Trigger {eventId: input.eventId, dryRun: input.dryRun, rebake: input.rebake, type: input.type,
+  enabled: input.enabled, executionId: input.executionId, strategy: input.strategy, user: input.user,
+  preferred: input.preferred}) RETURN t""")
+  createNotifications(input: NotificationsInput): Notifications @cypher(statement:
+  """MERGE (n:Notifications {address: input.address, level: input.level, type: input.type})
+  MERGE (p:Pipeline {id: input.id}) MERGE (p) - [:NOTIFIES] -> (n) RETURN n""")
   createStages(input: StagesInput): Stages @cypher(statement:
   """MERGE (s:Stages {id: input.id, refId: input.refId, type: input.type, name: input.name,
   startTime: input.startTime, endTime: input.endTime, status: input.status}) RETURN s""")
@@ -133,23 +163,28 @@ type Mutation {
   createdArtifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
   version: input.version, reference: input.reference, name: input.name, artifactAccount: input.artifactAccount})
-  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:CREATED] -> (a)  RETURN a""")
+  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:CREATED] -> (a)
+  CREATE (m:Metadata {account: input.account}) MERGE (a) - [:METADATA] -> (m) RETURN a""")
   boundArtifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
   version: input.version, reference: input.reference, name: input.name, artifactAccount: input.artifactAccount})
-  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:BOUND] -> (a)  RETURN a""")
+  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:BOUND] -> (a)
+  CREATE (m:Metadata {account: input.account}) MERGE (a) - [:METADATA] -> (m) RETURN a""")
   optionalArtifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
   version: input.version, reference: input.reference, name: input.name, artifactAccount: input.artifactAccount})
-  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:OPTIONAL] -> (a)  RETURN a""")
+  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:OPTIONAL] -> (a)
+  CREATE (m:Metadata {account: input.account}) MERGE (a) - [:METADATA] -> (m) RETURN a""")
   requiredArtifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
   version: input.version, reference: input.reference, name: input.name, artifactAccount: input.artifactAccount})
-  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:REQUIRED] -> (a)  RETURN a""")
+  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:REQUIRED] -> (a)
+  CREATE (m:Metadata {account: input.account}) MERGE (a) - [:METADATA] -> (m) RETURN a""")
   artifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
   version: input.version, reference: input.reference, name: input.name, artifactAccount: input.artifactAccount})
-  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:ARTIFACT] -> (a)  RETURN a""")
+  MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o:Outputs) MERGE (o) - [:ARTIFACT] -> (a)
+  CREATE (m:Metadata {account: input.account}) MERGE (a) - [:METADATA] -> (m) RETURN a""")
 
   createStageTimeline(input: StagesRelationshipInput): Stages @cypher(statement:
   "MERGE (s1:Stages { refId: input.s1}) MERGE (s2:Stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
@@ -190,11 +225,13 @@ type Message {
   pipelinecomplete: Pipelinecomplete
 }
 
-type Notifications { address: String
+type Notifications {
+  address: String
   level: String
   type: String
   when: [String]
-  message: Message }
+  message: Message
+}
 
 type Trigger {
   type: String
@@ -287,6 +324,10 @@ type Outputs {
   artifacts: [String]
   propertyFileContents: PropertyFileContents @relation(name: "GIT_INFO", direction:IN)
   buildInfo: BuildInfo @relation(name: "INFORMS_ABOUT", direction:IN)
+}
+
+type Metadata {
+  account: String
 }
 
 type Context {

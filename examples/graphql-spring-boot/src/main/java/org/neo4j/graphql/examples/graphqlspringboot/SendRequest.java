@@ -19,7 +19,7 @@ public class SendRequest {
         addData();
     }
 
-    static String path = "/Users/rajeevbommana/Desktop/pipeline.json";
+    static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
 
     public static void addData() {
         JSONObject jo2 = readJSON();
@@ -56,12 +56,57 @@ public class SendRequest {
         JSONObject jo = new JSONObject();
         jo.put("query", mutation);
         whenSendPostRequest_thenCorrect(jo);
+        addNotifications(jo2, (String) jo2.get("id"));
+    }
+
+    public static void addNotifications(JSONObject jo2, String id) {
+        JSONArray notis = jo2.getJSONArray("notifications");
+        for (int i = 0; i < notis.length(); i++) {
+            Iterator<String> it = notis.getJSONObject(i).keys();
+            ArrayList<String> lst = new ArrayList<>();
+            while (it.hasNext()) {
+                String k = it.next();
+                if (k.equals("message") || k.equals("when")) {
+                    continue;
+                }
+                else {
+                    lst.add(k + ": \"" + notis.getJSONObject(i).get(k) + "\"");
+                }
+            }
+            lst.add("id: \"" + id + "\"");
+            String fields = String.join(", ", lst);
+            String mutation = "mutation {\n" +
+                    "  createNotifications(input: {"+fields+"}) {\n" +
+                    "    __typename\n" +
+                    "  }\n" +
+                    "}";
+            JSONObject jo = new JSONObject();
+            jo.put("query", mutation);
+            whenSendPostRequest_thenCorrect(jo);
+        }
     }
 
     public static void addTrigger(JSONObject jo2) {
+        Iterator<String> it = jo2.getJSONObject("trigger").keys();
+        ArrayList<String> lst = new ArrayList<>();
+        while (it.hasNext()) {
+            String k = it.next();
+            if (k.equals("expectedArtifacts") || k.equals("resolvedExpectedArtifacts") || k.equals("notifications")
+                    || k.equals("artifacts") || k.equals("parameters")) {
+                continue;
+            }
+            else if (k.equals("rebake") || k.equals("dryRun") || k.equals("strategy") || k.equals("enabled")
+                    || k.equals("preferred")) {
+                lst.add(k+": "+jo2.getJSONObject("trigger").get(k)+"");
+            }
+            else {
+                lst.add(k + ": \"" + jo2.getJSONObject("trigger").get(k) + "\"");
+            }
+        }
+        String fields = String.join(", ", lst);
         String id = (String) jo2.getJSONObject("trigger").get("executionId");
         String mutation = "mutation {\n" +
-                "  createTrigger(input: {executionId: \""+id+"\"}) {\n" +
+                "  createTrigger(input: {"+fields+"}) {\n" +
                 "    executionId\n" +
                 "  }\n" +
                 "}";
@@ -194,9 +239,11 @@ public class SendRequest {
         //iterates through fields
         while (it.hasNext()) {
             String k = it.next();
-            //incomplete for now
+
             if (k.equals("metadata")) {
-                continue;
+                if (jo2.getJSONObject(k).has("account")) {
+                    lst.add("account: \"" + jo2.getJSONObject(k).get("account") + "\"");
+                }
             }
             //non String type
             else if (k.equals("customKind")) {

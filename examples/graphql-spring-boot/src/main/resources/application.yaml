@@ -1,12 +1,12 @@
 org :
   neo4j :
     driver :
-      uri : neo4j://localhost:7687
+      uri : neo4j+s://c1463b25.databases.neo4j.io
       authentication :
         username : neo4j
-        password : movies
+        password : _ILpJujYUrlGQDc-aJiASNqhidUgseJFhPmyl1-UOEE
       config :
-        encrypted : false
+        encrypted : true
 database : neo4j
 spring :
   graphql :

@@ -19,7 +19,7 @@ public class SendRequest {
         addData();
     }
 
-    static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
+    static String path = "/Users/rajeevbommana/Desktop/pipeline.json";
 
     public static void addData() {
         JSONObject jo2 = readJSON();
@@ -27,6 +27,7 @@ public class SendRequest {
         addTrigger(jo2);
         addStages(jo2);
         addPrevStages(jo2);
+        addContext(jo2);
     }
 
     public static void addPipeline(JSONObject jo2) {
@@ -107,6 +108,7 @@ public class SendRequest {
             jo.put("query", mutation);
             whenSendPostRequest_thenCorrect(jo);
             addOutputs(stages.getJSONObject(i).getJSONObject("outputs"), id);
+
         }
     }
 
@@ -218,7 +220,111 @@ public class SendRequest {
         whenSendPostRequest_thenCorrect(jo);
     }
 
-    public static JSONObject readJSON() {
+    public static void addContext(JSONObject jo2) {
+
+            JSONArray curr = jo2.getJSONArray("stages");
+            ArrayList<String> holder = new ArrayList<>();
+            ArrayList<String> keys = new ArrayList<>();
+            //keys.add("buildNumber");
+            keys.add("propertyFile");
+            //keys.add("consecutiveErrors");
+            String adder = "";
+
+
+            for(int i = 0; i < curr.length(); i++) {
+                String id = "";
+
+                //need to decide how to update schema in order to include  or exclude certain fields
+                /*
+                for(int j = 0; j < keys.size(); j++) {
+                    try {
+                        adder = (String) curr.getJSONObject(i).getJSONObject("context").get(keys.get(j));
+                    }
+                    catch (JSONException e){}
+
+                    if(!adder.isBlank()) {
+
+                        holder.add(keys.get(j)+": "+adder+"");
+
+
+                    }
+
+                }
+
+                 */
+
+
+                try {
+                    id = (String) curr.getJSONObject(i).get("refId");
+                }
+                catch (JSONException e){}
+                holder.add("refId: \"" + id + "\"");
+                String fields = String.join(", ", holder);
+
+                String main = "refId: \"" + id + "\"";
+
+                String mutation = "mutation {\n" +
+                        "  createContext(input: {" + fields+ "}) {\n" +
+                        "    refId\n" +
+                        "  }\n" +
+                        "}";
+                JSONObject jo = new JSONObject();
+                jo.put("query", mutation);
+                whenSendPostRequest_thenCorrect(jo);
+
+
+
+
+
+
+
+
+
+            }
+
+        for(int m = curr.length()-1; m >= 0; m--){
+
+            String currid = "";
+            try {
+                currid = (String)curr.getJSONObject(m).get("refId");
+
+            }
+            catch (JSONException e){}
+
+            JSONArray endpoints = (JSONArray) curr.getJSONObject(m).get("requisiteStageRefIds");
+
+            for(int v = 0; v < endpoints.length(); v++){
+
+                String mutation = "mutation {\n" +
+                        "  ContextMerger(input: {c1: \""+endpoints.get(v)+"\", s1: \""+currid+"\"}) {\n" +
+                        "    refId\n" +
+                        "  }\n" +
+                        "}";
+                JSONObject jo = new JSONObject();
+                jo.put("query", mutation);
+                whenSendPostRequest_thenCorrect(jo);
+
+            }
+
+
+
+
+        }
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+        public static JSONObject readJSON() {
         JSONObject jo = null;
         try {
             File myObj = new File(path);

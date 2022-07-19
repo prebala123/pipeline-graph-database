@@ -19,6 +19,19 @@ input TriggerInput {
   executionId: String
 }
 
+input ContextInput{
+
+  propertyFile: String
+  consecutiveErrors: String
+  refId: String
+  Buildnumber: String
+
+}
+
+
+
+
+
 input StagesInput {
   id: String
   refId: String
@@ -73,6 +86,12 @@ input StagesRelationshipInput {
   s2: String
 }
 
+input ContextRelationshipInput{
+
+  c1: String
+  s1: String
+}
+
 type Mutation {
   createPipeline(input: PipelineInput): Pipeline @cypher(statement:
   """MERGE (p:Pipeline {type: input.type, id: input.id, application: input.application, name: input.name,
@@ -92,6 +111,24 @@ type Mutation {
   trigger_json: input.trigger_json, executedBy: input.executedBy, message: input.message, status: input.status,
   comments: input.comments, navigationalURL: input.navigationalURL, cimage: input.cimage, bimage: input.bimage,
   prodimage: input.prodimage}) MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:OUTPUTS] -> (o) RETURN o""")
+
+
+
+  createContext(input: ContextInput): Context@cypher(statement:
+
+    """CREATE (c:Context{propertyFile: input.propertyFile, buildNumber: input.buildNumber, refId: input.refId
+
+        }) MERGE (s1:Stages { refId: input.refId}) MERGE (s1) - [:CONTEXTUALIZES] -> (c) RETURN c"""
+
+  )
+
+  ContextMerger(input:ContextRelationshipInput): Context@cypher(statement:
+
+  "MERGE (c1:Context { refId: input.c1}) MERGE (s1:Stages { refId: input.s1}) MERGE (c1) - [:NEXT] -> (s1) RETURN s1")
+
+
+
+
 
   createdArtifacts(input: ArtifactInput): Artifact @cypher(statement:
   """CREATE (a:Artifact {customKind: input.customKind, location: input.location, type: input.type,
@@ -253,8 +290,9 @@ type Outputs {
 }
 
 type Context {
+  refId: String
   propertyFile: String
-  consecutiveErrors: Int
+  consecutiveErrors: String
   queuedBuild: String
   Buildnumber: String
   GitBranch: String
@@ -267,6 +305,7 @@ type Context {
   continuePipeline: Boolean
   propertyFileContents: PropertyFileContents @relation(name: "GIT_INFO", direction:IN)
   buildInfo: BuildInfo @relation(name: "INFORMS_ABOUT", direction:IN)
+  NextStage: [Stages] @relation(name: "NEXT_STAGE", direction:OUT)
 }
 
 type Stages {
@@ -280,7 +319,7 @@ type Stages {
   requisiteStageRefIds: [String ]
   tasks: [Tasks] @relation(name: "REQUIRED_TASKS", direction:IN)
   outputs: Outputs @relation(name: "OUTPUTS", direction:OUT)
-  context: Context @relation(name: "CONTEXTUALIZES", direction:IN)
+  context: Context @relation(name: "CONTEXTUALIZES", direction:OUT)
   NextStage: [Stages] @relation(name: "NEXT_STAGE", direction:OUT)
 }
 

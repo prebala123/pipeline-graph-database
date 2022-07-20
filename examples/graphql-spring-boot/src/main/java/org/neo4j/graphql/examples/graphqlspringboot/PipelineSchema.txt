@@ -1,0 +1,1110 @@
+type metadata {
+    generation: Float
+    uid: String
+    resourceVersion: String
+    name: String
+    namespace: String
+    creationTimestamp: String
+    annotations: annotations
+    id: Float
+    generateName: String
+    account: String
+    labels: labels
+    
+}
+
+type connectors {
+    connectorType: String
+    helpText: String
+    values: [values]
+    supportedParams: [supportedParams]
+    label: String
+    isMultiSupported: Boolean
+    
+}
+
+type kato_tasks {
+    resultObjects: [resultObjects]
+    id: Float
+    history: [history]
+    status: status
+    
+}
+
+type securityContext {
+    
+}
+
+type statusCategory {
+    colorName: String
+    name: String
+    self: String
+    id: Float
+    key: String
+    
+}
+
+type resolution {
+    name: String
+    self: String
+    description: String
+    id: Float
+    
+}
+
+type context {
+    deploy_account_name: String
+    outputs_createdArtifacts: [outputs_createdArtifacts]
+    propertyFile: String
+    webhook: webhook
+    queuedBuild: String
+    namespaceOverride: String
+    source: String
+    buildNumber: Float
+    JobNumber: String
+    mode: String
+    payload: String
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
+    kato_last_task_id: kato_last_task_id
+    requiredArtifactIds: [String]
+    requiredArtifacts: [requiredArtifacts]
+    artifacts: [artifacts]
+    parameterValues: parameterValues
+    app: String
+    method: String
+    manifest_account_name: String
+    kato_task_terminalRetryCount: Float
+    statusUrlResolution: String
+    kato_task_firstNotFoundRetry: Float
+    failOnFailedExpressions: Boolean
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace
+    messages: [messages]
+    failedManifests: [failedManifests]
+    kato_tasks: [kato_tasks]
+    outputs_manifests: [outputs_manifests]
+    deploy_jobs: deploy_jobs
+    hosturl: String
+    job: String
+    parameters: parameters
+    notification_type: String
+    payloadConstraint: [String]
+    jobStatus: jobStatus
+    consecutiveErrors: Float
+    terminalStatuses: String
+    buildInfo: buildInfo
+    credentials: String
+    completionDetails: completionDetails
+    statusEndpoint: String
+    Buildnumber: String
+    GitBranch: String
+    consumeArtifactSource: String
+    stableManifests: [stableManifests]
+    GitRepo: String
+    manifest_location: String
+    cloudProvider: String
+    kato_result_expected: Boolean
+    manifest_name: String
+    deploy_server_groups: deploy_server_groups
+    trafficManagement: trafficManagement
+    alias: String
+    key: String
+    customHeaders: customHeaders
+    statusJsonPath: String
+    expectedArtifacts: [expectedArtifacts]
+    progressJsonPath: String
+    variables: [variables]
+    comments: Float
+    replicas: Float
+    manifest: manifest
+    manifestName: String
+    canceledStatuses: String
+    moniker: moniker
+    waitForCompletion: Boolean
+    url: String
+    master: String
+    optionalArtifacts: [optionalArtifacts]
+    application: String
+    outputs_boundArtifacts: [outputs_boundArtifacts]
+    successStatuses: String
+    manifests: [manifests]
+    report: String
+    failPipeline: Boolean
+    location: String
+    kato_task_notFoundRetryCount: Float
+    waitTime: Float
+    account: String
+    skipExpressionEvaluation: Boolean
+    continuePipeline: Boolean
+    propertyFileContents: propertyFileContents
+    kato_task_lastStatus: String
+    
+}
+
+type options {
+    enableTraffic: Boolean
+    services: Boolean
+    
+}
+
+type state {
+    terminated: terminated
+    
+}
+
+type scm {
+    sha1: String
+    name: String
+    remoteUrl: String
+    branch: String
+    
+}
+
+type tasks {
+    stageStart: Boolean
+    loopStart: Boolean
+    stageEnd: Boolean
+    name: String
+    startTime: Float
+    id: Float
+    endTime: Float
+    loopEnd: Boolean
+    implementingClass: String
+    status: status
+    
+}
+
+type requiredArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    artifactAccount: String
+    type: String
+    
+}
+
+type matchLabels {
+    app: String
+    component: String
+    controller_uid: String
+    
+}
+
+type avatarUrls {
+    48x48: String
+    24x24: String
+    16x16: String
+    32x32: String
+    
+}
+
+type volumes {
+    configMap: configMap
+    name: String
+    
+}
+
+type priority {
+    name: String
+    self: String
+    iconUrl: String
+    id: Float
+    
+}
+
+type labels {
+    app: String
+    app_kubernetes_io_managed_by: String
+    component: String
+    webhook: webhook
+    job_name: String
+    app_kubernetes_io_name: String
+    version: String
+    controller_uid: String
+    
+}
+
+type outputs_manifests {
+    metadata: metadata
+    apiVersion: String
+    kind: String
+    spec: spec
+    status: status
+    
+}
+
+type assignee {
+    accountId: String
+    avatarUrls: avatarUrls
+    displayName: String
+    accountType: String
+    self: String
+    active: Boolean
+    timeZone: String
+    
+}
+
+type conditions {
+    reason: String
+    lastTransitionTime: Float
+    message: message
+    type: String
+    lastUpdateTime: String
+    status: status
+    
+}
+
+type matchArtifact {
+    customKind: Boolean
+    metadata: metadata
+    name: String
+    artifactAccount: String
+    id: Float
+    type: String
+    
+}
+
+type deploy_server_groups {
+    
+}
+
+type notifications {
+    address: String
+    level: String
+    message: message
+    type: String
+    when: [String]
+    
+}
+
+type status {
+    retryable: Boolean
+    phase: String
+    containerStatuses: [containerStatuses]
+    hostIP: String
+    replicas: Float
+    readyReplicas: Float
+    description: String
+    completed: Boolean
+    failed: Boolean
+    statusCategory: statusCategory
+    updatedReplicas: Float
+    availableReplicas: Float
+    podIPs: [podIPs]
+    podIP: String
+    loadBalancer: loadBalancer
+    name: String
+    self: String
+    startTime: Float
+    qosClass: String
+    iconUrl: String
+    id: Float
+    conditions: [conditions]
+    observedGeneration: Float
+    
+}
+
+type template {
+    metadata: metadata
+    spec: spec
+    
+}
+
+type jobStatus {
+    provider: String
+    completionDetails: completionDetails
+    jobState: String
+    name: String
+    createdTime: Float
+    location: String
+    pods: [pods]
+    account: String
+    
+}
+
+type buildInfo {
+    duration: Float
+    result: String
+    number: Float
+    name: String
+    fullDisplayName: String
+    id: Float
+    scm: [scm]
+    building: Boolean
+    url: String
+    timestamp: String
+    artifacts: [artifacts]
+    
+}
+
+type pipeline_failed {
+    text: String
+    
+}
+
+type createdArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    location: String
+    type: String
+    version: String
+    
+}
+
+type ports {
+    protocol: String
+    port: Float
+    name: String
+    containerPort: Float
+    targetPort: Float
+    
+}
+
+type secretKeyRef {
+    name: String
+    key: String
+    
+}
+
+type deploy_jobs {
+    default: [String]
+    
+}
+
+type trafficManagement {
+    options: options
+    enabled: Boolean
+    
+}
+
+type variables {
+    sourceValue: String
+    value: Float
+    key: String
+    
+}
+
+type creator {
+    accountId: String
+    emailAddress: String
+    avatarUrls: avatarUrls
+    displayName: String
+    accountType: String
+    self: String
+    active: Boolean
+    timeZone: String
+    
+}
+
+type reporter {
+    accountId: String
+    emailAddress: String
+    avatarUrls: avatarUrls
+    displayName: String
+    accountType: String
+    self: String
+    active: Boolean
+    timeZone: String
+    
+}
+
+type trigger {
+    expectedArtifacts: [expectedArtifacts]
+    eventId: String
+    dryRun: Boolean
+    rebake: Boolean
+    type: String
+    enabled: Boolean
+    executionId: String
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
+    strategy: strategy
+    user: String
+    parameters: parameters
+    notifications: [notifications]
+    preferred: Boolean
+    artifacts: [artifacts]
+    
+}
+
+type aggregateprogress {
+    total: Float
+    progress: Float
+    
+}
+
+type Pipeline {
+    keepWaitingPipelines: Boolean
+    pipelineConfigId: String
+    systemNotifications: String
+    buildTime: Float
+    spelEvaluator: String
+    origin: String
+    trigger: trigger
+    type: String
+    canceled: Boolean
+    limitConcurrent: Boolean
+    application: String
+    initialConfig: initialConfig
+    name: String
+    stages: [stages]
+    startTime: Float
+    id: Float
+    endTime: Float
+    notifications: [notifications]
+    status: status
+    authentication: authentication
+    
+}
+
+type customfield_10315 {
+    hasEpicLinkFieldDependency: Boolean
+    showField: Boolean
+    nonEditableReason: nonEditableReason
+    
+}
+
+type manifests {
+    metadata: metadata
+    apiVersion: String
+    kind: String
+    spec: spec
+    status: status
+    
+}
+
+type outputs_boundArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    artifactAccount: String
+    type: String
+    
+}
+
+type progress {
+    total: Float
+    progress: Float
+    
+}
+
+type supportedParams {
+    helpText: String
+    name: String
+    label: String
+    type: String
+    
+}
+
+type votes {
+    hasVoted: Boolean
+    self: String
+    votes: Float
+    
+}
+
+type worklog {
+    total: Float
+    maxResults: Float
+    startAt: Float
+    worklogs: Float
+    
+}
+
+type propertyFileContents {
+    GitRepo: String
+    Buildnumber: String
+    report: String
+    GitBranch: String
+    hosturl: String
+    JobNumber: String
+    key: String
+    
+}
+
+type outputs {
+    outputs_createdArtifacts: [outputs_createdArtifacts]
+    reason: String
+    jobStatus: jobStatus
+    buildInfo: buildInfo
+    completionDetails: completionDetails
+    Buildnumber: String
+    GitBranch: String
+    bimage: String
+    JobNumber: String
+    prodimage: String
+    canaryReportURL: String
+    GitRepo: String
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
+    startTime: Float
+    key: String
+    artifacts: [artifacts]
+    requiredArtifacts: [requiredArtifacts]
+    executedBy: String
+    comments: Float
+    manifest: manifest
+    overallScore: Float
+    navigationalURL: String
+    trigger: trigger
+    overallResult: String
+    message: message
+    trigger_json: String
+    cimage: String
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace
+    optionalArtifacts: [optionalArtifacts]
+    outputs_boundArtifacts: [outputs_boundArtifacts]
+    manifests: [manifests]
+    report: String
+    canaryimage: String
+    outputs_manifests: [outputs_manifests]
+    hosturl: String
+    location: String
+    propertyFileContents: propertyFileContents
+    status: status
+    
+}
+
+type issuetype {
+    avatarId: Float
+    hierarchyLevel: Float
+    name: String
+    self: String
+    description: String
+    entityId: String
+    id: Float
+    iconUrl: String
+    subtask: Boolean
+    
+}
+
+type webhook {
+    headers: headers
+    statusEndpoint: String
+    statusCodeValue: Float
+    monitor: monitor
+    body: body
+    statusCode: String
+    
+}
+
+type pipeline_complete {
+    text: String
+    
+}
+
+type nonEditableReason {
+    reason: String
+    message: message
+    
+}
+
+type annotations {
+    artifact_spinnaker_io_name: String
+    strategy_spinnaker_io_max_version_history: String
+    prometheus_io_path: String
+    strategy_spinnaker_io_recreate: String
+    prometheus_io_port: String
+    deployment_kubernetes_io_revision: String
+    artifact_spinnaker_io_type: String
+    artifact_spinnaker_io_version: String
+    cloud_google_com_neg: String
+    strategy_spinnaker_io_versioned: String
+    artifact_spinnaker_io_location: String
+    prometheus_io_scrape: String
+    kubectl_kubernetes_io_last_applied_configuration: String
+    moniker_spinnaker_io_cluster: String
+    moniker_spinnaker_io_application: String
+    
+}
+
+type project {
+    simplified: Boolean
+    avatarUrls: avatarUrls
+    name: String
+    self: String
+    id: Float
+    projectTypeKey: String
+    key: String
+    
+}
+
+type manifestNamesByNamespace {
+    default: [String]
+    deploy_prod: [String]
+    deploy_qa: [String]
+    
+}
+
+type body {
+    expand: String
+    self: String
+    id: Float
+    fields: fields
+    key: String
+    
+}
+
+type spec {
+    template: template
+    dnsPolicy: String
+    clusterIPs: [String]
+    terminationGracePeriodSeconds: Float
+    ipFamilyPolicy: String
+    backoffLimit: Float
+    replicas: Float
+    parallelism: Float
+    sessionAffinity: String
+    volumes: [volumes]
+    completions: Float
+    securityContext: securityContext
+    ports: [ports]
+    type: String
+    restartPolicy: String
+    ttlSecondsAfterFinished: Float
+    ipFamilies: [String]
+    containers: [containers]
+    revisionHistoryLimit: Float
+    selector: selector
+    strategy: strategy
+    schedulerName: String
+    progressDeadlineSeconds: Float
+    clusterIP: String
+    
+}
+
+type volumeMounts {
+    mountPath: String
+    name: String
+    subPath: String
+    
+}
+
+type resolvedExpectedArtifacts {
+    usePriorArtifact: Boolean
+    useDefaultArtifact: Boolean
+    defaultArtifact: defaultArtifact
+    id: Float
+    boundArtifact: boundArtifact
+    matchArtifact: matchArtifact
+    
+}
+
+type kato_last_task_id {
+    id: Float
+    
+}
+
+type artifacts {
+    reference: String
+    customKind: Boolean
+    fileName: String
+    metadata: metadata
+    relativePath: String
+    name: String
+    location: String
+    displayPath: String
+    type: String
+    version: String
+    decorated: Boolean
+    
+}
+
+type parameterValues {
+    summary: String
+    cancel: String
+    issuetype: issuetype
+    issue: String
+    success: String
+    description: String
+    terminate: String
+    projectid: String
+    retry: String
+    
+}
+
+type issuerestriction {
+    issuerestrictions: issuerestrictions
+    shouldDisplay: Boolean
+    
+}
+
+type watches {
+    self: String
+    isWatching: Boolean
+    watchCount: Float
+    
+}
+
+type containerStatuses {
+    image: String
+    imageID: String
+    restartCount: Float
+    ready: Boolean
+    name: String
+    started: Boolean
+    state: state
+    containerID: String
+    lastState: lastState
+    
+}
+
+type history {
+    phase: String
+    status: status
+    
+}
+
+type podIPs {
+    ip: String
+    
+}
+
+type configMap {
+    defaultMode: Float
+    name: String
+    
+}
+
+type containers {
+    args: [String]
+    image: String
+    imagePullPolicy: String
+    terminationMessagePolicy: String
+    terminationMessagePath: String
+    name: String
+    resources: resources
+    ports: [ports]
+    env: [env]
+    command: [String]
+    volumeMounts: [volumeMounts]
+    
+}
+
+type fields {
+    statuscategorychangedate: String
+    issuetype: issuetype
+    components: components
+    project: project
+    description: String
+    customfield_10373: String
+    fixVersions: String
+    resolution: resolution
+    timetracking: timetracking
+    customfield_10105: String
+    attachment: String
+    resolutiondate: String
+    workratio: Float
+    summary: String
+    issuerestriction: issuerestriction
+    watches: watches
+    creator: creator
+    subtasks: subtasks
+    created: String
+    reporter: reporter
+    aggregateprogress: aggregateprogress
+    priority: priority
+    customfield_10344: customfield_10344
+    customfield_10300: String
+    labels: labels
+    customfield_10315: customfield_10315
+    customfield_10317: String
+    versions: versions
+    progress: Float
+    issuelinks: issuelinks
+    votes: Float
+    comment: comment
+    assignee: assignee
+    worklog: worklog
+    updated: String
+    status: status
+    
+}
+
+type parameters {
+    connectors: [connectors]
+    loadtime: String
+    canarystarttime: Float
+    log: String
+    lifetime: String
+    baselinestarttime: Float
+    minicanaryresult: String
+    serviceip: String
+    policyurl: String
+    metric: String
+    payload: String
+    canaryresultscore: String
+    gate: String
+    gateUrl: String
+    gateurl: String
+    imageids: String
+    imageIds: String
+    policypath: String
+    
+}
+
+type completionDetails {
+    reason: String
+    exitCode: Float
+    message: message
+    signal: String
+    
+}
+
+type values {
+    artifact: String
+    projectKey: String
+    jira_ticket_no: String
+    buildId: String
+    job: String
+    branch: String
+    
+}
+
+type outputs_manifestNamesByNamespace {
+    default: [String]
+    deploy_prod: [String]
+    deploy_qa: [String]
+    
+}
+
+type lastState {
+    
+}
+
+type boundArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    artifactAccount: String
+    type: String
+    
+}
+
+type timetracking {
+    
+}
+
+type outputs_createdArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    location: String
+    type: String
+    version: String
+    
+}
+
+type stableManifests {
+    manifestName: String
+    location: String
+    
+}
+
+type pipeline_starting {
+    text: String
+    
+}
+
+type loadBalancer {
+    
+}
+
+type resultObjects {
+    createdArtifacts: [createdArtifacts]
+    deployedNamesByLocation: deployedNamesByLocation
+    manifests: [manifests]
+    manifestNamesByNamespace: manifestNamesByNamespace
+    boundArtifacts: [boundArtifacts]
+    
+}
+
+type selector {
+    app: String
+    matchLabels: matchLabels
+    
+}
+
+type rollingUpdate {
+    maxSurge: String
+    maxUnavailable: String
+    
+}
+
+type terminated {
+    reason: String
+    exitCode: Float
+    startedAt: Float
+    containerID: String
+    finishedAt: Float
+    
+}
+
+type customHeaders {
+    Authorization: [String]
+    Content_Type: [String]
+    
+}
+
+type authentication {
+    allowedAccounts: [String]
+    user: String
+    
+}
+
+type expectedArtifacts {
+    usePriorArtifact: Boolean
+    displayName: String
+    useDefaultArtifact: Boolean
+    defaultArtifact: defaultArtifact
+    id: Float
+    matchArtifact: matchArtifact
+    
+}
+
+type issuerestrictions {
+    
+}
+
+type headers {
+    date: String
+    server: String
+    x_envoy_upstream_service_time: String
+    vary: String
+    expect_ct: String
+    strict_transport_security: String
+    atl_traceid: String
+    set_cookie: String
+    nel: String
+    x_content_type_options: String
+    x_xss_protection: String
+    x_arequestid: String
+    content_type: String
+    x_aaccountid: String
+    report_to: String
+    timing_allow_origin: String
+    cache_control: String
+    
+}
+
+type manifest {
+    metadata: metadata
+    apiVersion: String
+    kind: String
+    spec: spec
+    status: status
+    
+}
+
+type resources {
+    
+}
+
+type defaultArtifact {
+    customKind: Boolean
+    metadata: metadata
+    id: Float
+    
+}
+
+type monitor {
+    headers: headers
+    statusCodeValue: Float
+    body: body
+    statusCode: String
+    progressMessage: String
+    
+}
+
+type moniker {
+    app: String
+    
+}
+
+type boundArtifact {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    type: String
+    
+}
+
+type env {
+    name: String
+    value: Float
+    valueFrom: valueFrom
+    
+}
+
+type message {
+    pipeline_complete: pipeline_complete
+    pipeline_starting: pipeline_starting
+    pipeline_failed: pipeline_failed
+    
+}
+
+type valueFrom {
+    secretKeyRef: secretKeyRef
+    
+}
+
+type optionalArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata
+    name: String
+    location: String
+    type: String
+    version: String
+    
+}
+
+type initialConfig {
+    
+}
+
+type deployedNamesByLocation {
+    default: [String]
+    
+}
+
+type stages {
+    outputs: outputs
+    requisiteStageRefIds: [String]
+    name: String
+    context: context
+    startTime: Float
+    id: Float
+    refId: String
+    endTime: Float
+    type: String
+    tasks: [tasks]
+    status: status
+    
+}
+
+type pods {
+    name: String
+    status: status
+    
+}
+
+type comment {
+    total: Float
+    comments: Float
+    maxResults: Float
+    self: String
+    startAt: Float
+    
+}
+
+type strategy {
+    type: String
+    rollingUpdate: rollingUpdate
+    
+}
+

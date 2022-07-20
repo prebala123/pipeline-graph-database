@@ -187,6 +187,14 @@ type Mutation {
   createPipelineTrigger(input: StagesRelationshipInput): Pipeline @cypher(statement:
   "MERGE (s1:Trigger { executionId: input.s1}) MERGE (s2:Pipeline {id: input.s2}) MERGE (s2) - [:NEXT] -> (s1) RETURN s2")
 
+  attachStages(input: StagesRelationshipInput): Stages @cypher(statement:
+  """MATCH (s1:stages { refId: input.s1}) MATCH (s2:stages { refId: input.s2}) MATCH (o1:outputs) <-- (s1)
+  MATCH (c1:context) <-- (s2) CREATE (s1) - [:NEXT] -> (s2) CREATE (o1) - [:NEXT] -> (c1) RETURN s1""")
+  attachTrigger(input: StagesRelationshipInput): Stages @cypher(statement:
+  "MERGE (s1:trigger { executionId: input.s1}) MERGE (s2:stages { refId: input.s2}) MERGE (s1) - [:NEXT] -> (s2) RETURN s2")
+  attachPipeline(input: StagesRelationshipInput): Pipeline @cypher(statement:
+  "MERGE (s1:trigger { executionId: input.s1}) MERGE (s2:Pipeline {id: input.s2}) MERGE (s2) - [:NEXT] -> (s1) RETURN s2")
+
   deleteAll: Pipeline @cypher(statement: "MATCH (a) DETACH DELETE a")
 }
 

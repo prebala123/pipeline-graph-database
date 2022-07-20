@@ -68,7 +68,7 @@ public class PopulateDatabase implements AutoCloseable {
     }
 
     public static JSONObject readJSON() {
-        String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
+        String path = SendRequest.path;
         JSONObject jo = null;
         try {
             File myObj = new File(path);
@@ -87,16 +87,23 @@ public class PopulateDatabase implements AutoCloseable {
         return jo;
     }
 
-    public void addPipeline(JSONObject jo, String type) {
+    public void addPipeline(JSONObject jo, String type, String id) {
         HashMap<String, HashSet<String>> hm = separateFields(jo);
         Iterator<String> it = jo.keys();
+        Iterator<String> it2 = jo.keys();
         ArrayList<String> lst = new ArrayList<>();
+        ArrayList<String> replacements = new ArrayList<>(Arrays.asList(".", "/", "-"));
         type = type.replace(".", "_");
-        String cypher = "CREATE (node:" + type + " {";
+
+        String cypher = "";
+        if (id != null) {
+            cypher += "MATCH (prev) WHERE ID(prev) = " + id + " ";
+        }
+        cypher += "CREATE (node:" + type + " {";
 
         while (it.hasNext()) {
             String k = it.next();
-            ArrayList<String> replacements = new ArrayList<>(Arrays.asList(".", "/", "-"));
+
             String k2 = new String(k.toCharArray());
 
             for (String i: replacements) {
@@ -113,44 +120,70 @@ public class PopulateDatabase implements AutoCloseable {
                 }
                 lst.add(k2 + ": \"" + ((String) jo.get(k)).replace("\"", "\\\"") + "\"");
             }
-            else if (hm.get("Object").contains(k)){
-                addPipeline(jo.getJSONObject(k), k);
-            }
-            else {
+            else if (hm.get("Array").contains(k)) {
                 JSONArray arr = jo.getJSONArray(k);
                 for (int i = 0; i < arr.length(); i++) {
-                    if (arr.get(i) instanceof JSONObject) {
-                        addPipeline(arr.getJSONObject(i), k);
+                    if (!(arr.get(i) instanceof JSONObject) && !(arr.get(i) instanceof JSONObject)) {
+                        lst.add(k2 + ": " + jo.get(k) + "");
                     }
                 }
             }
         }
         String fields = String.join(", ", lst);
-        cypher += fields + "}) RETURN node";
+        cypher += fields + "})";
+        if (id != null) {
+            cypher += " CREATE (prev) - [:NEXT] -> (node)";
+        }
+        cypher += " RETURN node";
 
         String finalCypher = cypher;
+        String nodeId = null;
 
         try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
                 return result.single();
             });
+            nodeId = record.get("node").toString();
+            nodeId = nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">"));
+            //System.out.println(type + ": " + nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">")));
         } catch (Neo4jException ex) {
             LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
             throw ex;
+        }
+
+        while (it2.hasNext()) {
+            String k = it2.next();
+            String k2 = new String(k.toCharArray());
+
+            for (String i: replacements) {
+                k2 = k2.replace(i, "_");
+            }
+
+            if (hm.get("Object").contains(k)){
+                addPipeline(jo.getJSONObject(k), k, nodeId);
+            }
+            else if (hm.get("Array").contains(k)) {
+                JSONArray arr = jo.getJSONArray(k);
+                for (int i = 0; i < arr.length(); i++) {
+                    if (arr.get(i) instanceof JSONObject) {
+                        addPipeline(arr.getJSONObject(i), k, nodeId);
+                    }
+                }
+            }
         }
     }
 
     public static void main(String[] args){
         // Aura queries use an encrypted connection using the "neo4j+s" protocol
-         String uri = "neo4j://localhost";
-         String user = "neo4j";
-         String password = "movies";
+         String uri = SendRequest.uri;
+         String user = SendRequest.user;
+         String password = SendRequest.password;
 
         try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
             app.deleteAll();
             JSONObject jo = readJSON();
-            app.addPipeline(jo, "Pipeline");
+            app.addPipeline(jo, "Pipeline", null);
         } catch (Exception e) {
             System.out.println("fail");
         }

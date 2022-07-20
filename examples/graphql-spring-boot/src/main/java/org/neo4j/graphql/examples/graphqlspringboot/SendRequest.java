@@ -15,17 +15,24 @@ public class SendRequest {
     public static void main(String[] args) {
         //addData();
         PopulateDatabase.main(null);
+        addData();
     }
 
     static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
+    static String uri = "neo4j://localhost";
+    static String user = "neo4j";
+    static String password = "movies";
 
     public static void addData() {
-        JSONObject jo2 = readJSON();
+        JSONObject jo = readJSON();
+        addPrevStages(jo);
+
+        /*JSONObject jo2 = readJSON();
         addPipeline(jo2);
         addTrigger(jo2);
         addStages(jo2);
         addPrevStages(jo2);
-        addContext(jo2);
+        addContext(jo2);*/
     }
 
     public static void addPipeline(JSONObject jo2) {
@@ -163,7 +170,7 @@ public class SendRequest {
             JSONArray prevs = (JSONArray) stages.getJSONObject(i).get("requisiteStageRefIds");
             if (prevs.length() == 0) {
                 String mutation = "mutation {\n" +
-                        "  createStageTrigger(input: {s1: \""+jo2.get("id")+"\", s2: \""+id+"\"}) {\n" +
+                        "  attachTrigger(input: {s1: \""+jo2.get("id")+"\", s2: \""+id+"\"}) {\n" +
                         "    refId\n" +
                         "  }\n" +
                         "}";
@@ -173,7 +180,7 @@ public class SendRequest {
             }
             for (int j = 0; j < prevs.length(); j++) {
                 String mutation = "mutation {\n" +
-                        "  createStageTimeline(input: {s1: \""+prevs.get(j)+"\", s2: \""+id+"\"}) {\n" +
+                        "  attachStages(input: {s1: \""+prevs.get(j)+"\", s2: \""+id+"\"}) {\n" +
                         "    refId\n" +
                         "  }\n" +
                         "}";

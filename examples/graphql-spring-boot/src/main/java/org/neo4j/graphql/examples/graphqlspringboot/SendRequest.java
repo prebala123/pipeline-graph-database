@@ -13,7 +13,8 @@ import java.io.FileNotFoundException;
 
 public class SendRequest {
     public static void main(String[] args) {
-        addData();
+        //addData();
+        PopulateDatabase.main(null);
     }
 
     static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
@@ -346,7 +347,7 @@ public class SendRequest {
     }
 
 
-        public static JSONObject readJSON() {
+    public static JSONObject readJSON() {
         JSONObject jo = null;
         try {
             File myObj = new File(path);

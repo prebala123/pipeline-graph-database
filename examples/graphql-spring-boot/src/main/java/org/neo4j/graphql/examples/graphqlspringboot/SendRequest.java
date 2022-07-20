@@ -15,7 +15,7 @@ public class SendRequest {
     public static void main(String[] args) {
         //addData();
         PopulateDatabase.main(null);
-        addData();
+        addData2();
     }
 
     static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
@@ -24,15 +24,17 @@ public class SendRequest {
     static String password = "movies";
 
     public static void addData() {
-        JSONObject jo = readJSON();
-        addPrevStages(jo);
-
-        /*JSONObject jo2 = readJSON();
+        JSONObject jo2 = readJSON();
         addPipeline(jo2);
         addTrigger(jo2);
         addStages(jo2);
         addPrevStages(jo2);
-        addContext(jo2);*/
+        addContext(jo2);
+    }
+
+    public static void addData2() {
+        JSONObject jo = readJSON();
+        addPrevStages2(jo);
     }
 
     public static void addPipeline(JSONObject jo2) {
@@ -164,6 +166,34 @@ public class SendRequest {
     }
 
     public static void addPrevStages(JSONObject jo2) {
+        JSONArray stages = jo2.getJSONArray("stages");
+        for (int i = 0; i < stages.length(); i++) {
+            String id = (String) stages.getJSONObject(i).get("refId");
+            JSONArray prevs = (JSONArray) stages.getJSONObject(i).get("requisiteStageRefIds");
+            if (prevs.length() == 0) {
+                String mutation = "mutation {\n" +
+                        "  createStageTrigger(input: {s1: \""+jo2.get("id")+"\", s2: \""+id+"\"}) {\n" +
+                        "    refId\n" +
+                        "  }\n" +
+                        "}";
+                JSONObject jo = new JSONObject();
+                jo.put("query", mutation);
+                whenSendPostRequest_thenCorrect(jo);
+            }
+            for (int j = 0; j < prevs.length(); j++) {
+                String mutation = "mutation {\n" +
+                        "  createStageTimeline(input: {s1: \""+prevs.get(j)+"\", s2: \""+id+"\"}) {\n" +
+                        "    refId\n" +
+                        "  }\n" +
+                        "}";
+                JSONObject jo = new JSONObject();
+                jo.put("query", mutation);
+                whenSendPostRequest_thenCorrect(jo);
+            }
+        }
+    }
+
+    public static void addPrevStages2(JSONObject jo2) {
         JSONArray stages = jo2.getJSONArray("stages");
         for (int i = 0; i < stages.length(); i++) {
             String id = (String) stages.getJSONObject(i).get("refId");

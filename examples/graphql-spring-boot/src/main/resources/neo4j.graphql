@@ -40,17 +40,11 @@ input TriggerInput {
 }
 
 input ContextInput{
-
   propertyFile: String
   consecutiveErrors: String
   refId: String
   Buildnumber: String
-
 }
-
-
-
-
 
 input StagesInput {
   id: String
@@ -128,7 +122,7 @@ type Mutation {
   enabled: input.enabled, executionId: input.executionId, strategy: input.strategy, user: input.user,
   preferred: input.preferred}) RETURN t""")
   createNotifications(input: NotificationsInput): Notifications @cypher(statement:
-  """MERGE (n:Notifications {address: input.address, level: input.level, type: input.type})
+  """MERGE (n:Notifications {address: input.address, level: input.level, type: input.type, when: input.when})
   MERGE (p:Pipeline {id: input.id}) MERGE (p) - [:NOTIFIES] -> (n) RETURN n""")
   createStages(input: StagesInput): Stages @cypher(statement:
   """MERGE (s:Stages {id: input.id, refId: input.refId, type: input.type, name: input.name,

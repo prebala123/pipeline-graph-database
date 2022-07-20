@@ -6,12 +6,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 
 public class SendRequest {
@@ -33,17 +30,16 @@ public class SendRequest {
     public static void addPipeline(JSONObject jo2) {
         Iterator<String> it = jo2.keys();
         ArrayList<String> lst = new ArrayList<>();
+        HashMap<String, HashSet<String>> hm = separateFields(jo2);
         while (it.hasNext()) {
             String k = it.next();
-            if (k.equals("systemNotifications") || k.equals("trigger") || k.equals("initialConfig") || k.equals("stages")
-                    || k.equals("notifications") || k.equals("authentication")) {
+            if (hm.get("Object").contains(k) || hm.get("Array").contains(k)) {
                 continue;
             }
-            else if (k.equals("startTime") || k.equals("endTime") || k.equals("buildTime") || k.equals("canceled")
-                    || k.equals("limitConcurrent") || k.equals("keepWaitingPipelines")) {
+            else if (hm.get("Other").contains(k)) {
                 lst.add(k+": "+jo2.get(k)+"");
             }
-            else {
+            else if (hm.get("String").contains(k)){
                 lst.add(k + ": \"" + jo2.get(k) + "\"");
             }
         }
@@ -66,8 +62,11 @@ public class SendRequest {
             ArrayList<String> lst = new ArrayList<>();
             while (it.hasNext()) {
                 String k = it.next();
-                if (k.equals("message") || k.equals("when")) {
+                if (k.equals("message")) {
                     continue;
+                }
+                else if (k.equals("when")) {
+                    lst.add(k + ": " + notis.getJSONObject(i).get(k) + "");
                 }
                 else {
                     lst.add(k + ": \"" + notis.getJSONObject(i).get(k) + "\"");
@@ -89,18 +88,16 @@ public class SendRequest {
     public static void addTrigger(JSONObject jo2) {
         Iterator<String> it = jo2.getJSONObject("trigger").keys();
         ArrayList<String> lst = new ArrayList<>();
+        HashMap<String, HashSet<String>> hm = separateFields(jo2.getJSONObject("trigger"));
         while (it.hasNext()) {
             String k = it.next();
-            if (k.equals("expectedArtifacts") || k.equals("resolvedExpectedArtifacts") || k.equals("notifications")
-                    || k.equals("artifacts") || k.equals("parameters")) {
-                continue;
-            }
-            else if (k.equals("rebake") || k.equals("dryRun") || k.equals("strategy") || k.equals("enabled")
-                    || k.equals("preferred")) {
+            if (hm.get("Other").contains(k)) {
                 lst.add(k+": "+jo2.getJSONObject("trigger").get(k)+"");
             }
-            else {
+            else if (hm.get("String").contains(k)){
                 lst.add(k + ": \"" + jo2.getJSONObject("trigger").get(k) + "\"");
+            } else {
+                continue;
             }
         }
         String fields = String.join(", ", lst);
@@ -132,14 +129,15 @@ public class SendRequest {
             Iterator<String> it = stages.getJSONObject(i).keys();
             ArrayList<String> lst = new ArrayList<>();
             while (it.hasNext()) {
+                HashMap<String, HashSet<String>> hm = separateFields(stages.getJSONObject(i));
                 String k = it.next();
-                if (k.equals("outputs") || k.equals("tasks") || k.equals("context") || k.equals("requisiteStageRefIds")) {
+                if (hm.get("Object").contains(k) || hm.get("Array").contains(k)) {
                     continue;
                 }
-                else if (k.equals("startTime") || k.equals("endTime")) {
+                else if (hm.get("Other").contains(k)) {
                     lst.add(k+": "+stages.getJSONObject(i).get(k)+"");
                 }
-                else {
+                else if (hm.get("String").contains(k)){
                     lst.add(k + ": \"" + stages.getJSONObject(i).get(k) + "\"");
                 }
             }
@@ -319,14 +317,6 @@ public class SendRequest {
                 jo.put("query", mutation);
                 whenSendPostRequest_thenCorrect(jo);
 
-
-
-
-
-
-
-
-
             }
 
         for(int m = curr.length()-1; m >= 0; m--){
@@ -352,23 +342,8 @@ public class SendRequest {
                 whenSendPostRequest_thenCorrect(jo);
 
             }
-
-
-
-
         }
-
-
-            }
-
-
-
-
-
-
-
-
-
+    }
 
 
         public static JSONObject readJSON() {
@@ -388,6 +363,29 @@ public class SendRequest {
             e.printStackTrace();
         }
         return jo;
+    }
+
+    public static HashMap<String, HashSet<String>> separateFields(JSONObject jo) {
+        HashMap<String, HashSet<String>> hm = new HashMap<>();
+        hm.put("Object", new HashSet<>());
+        hm.put("Array", new HashSet<>());
+        hm.put("String", new HashSet<>());
+        hm.put("Other", new HashSet<>());
+        String kind = "";
+        for (int i = 0; i < jo.names().length(); i++) {
+            Object ob = jo.get(jo.names().getString(i));
+            if (ob instanceof JSONObject) {
+                kind = "Object";
+            } else if (ob instanceof JSONArray) {
+                kind = "Array";
+            } else if (ob instanceof String){
+                kind = "String";
+            } else {
+                kind = "Other";
+            }
+            hm.get(kind).add(jo.names().getString(i));
+        }
+        return hm;
     }
 
     public static void sendAnyQuery(String query) {

@@ -5,29 +5,29 @@ type metadata {
     name: String
     namespace: String
     creationTimestamp: String
-    annotations: annotations
+    annotations: annotations @relation(name: "", direction: IN)
     id: Float
     generateName: String
     account: String
-    labels: labels
+    labels: labels @relation(name: "", direction: IN)
     
 }
 
 type connectors {
     connectorType: String
     helpText: String
-    values: [values]
-    supportedParams: [supportedParams]
+    values: [values] @relation(name: "", direction: IN)
+    supportedParams: [supportedParams] @relation(name: "", direction: IN)
     label: String
     isMultiSupported: Boolean
     
 }
 
 type kato_tasks {
-    resultObjects: [resultObjects]
+    resultObjects: [resultObjects] @relation(name: "", direction: IN)
     id: Float
-    history: [history]
-    status: status
+    history: [history] @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
     
 }
 
@@ -54,9 +54,9 @@ type resolution {
 
 type context {
     deploy_account_name: String
-    outputs_createdArtifacts: [outputs_createdArtifacts]
+    outputs_createdArtifacts: [outputs_createdArtifacts] @relation(name: "", direction: IN)
     propertyFile: String
-    webhook: webhook
+    webhook: webhook @relation(name: "", direction: IN)
     queuedBuild: String
     namespaceOverride: String
     source: String
@@ -64,12 +64,12 @@ type context {
     JobNumber: String
     mode: String
     payload: String
-    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
-    kato_last_task_id: kato_last_task_id
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts] @relation(name: "", direction: IN)
+    kato_last_task_id: kato_last_task_id @relation(name: "", direction: IN)
     requiredArtifactIds: [String]
-    requiredArtifacts: [requiredArtifacts]
-    artifacts: [artifacts]
-    parameterValues: parameterValues
+    requiredArtifacts: [requiredArtifacts] @relation(name: "", direction: IN)
+    artifacts: [artifacts] @relation(name: "", direction: IN)
+    parameterValues: parameterValues @relation(name: "", direction: IN)
     app: String
     method: String
     manifest_account_name: String
@@ -77,56 +77,56 @@ type context {
     statusUrlResolution: String
     kato_task_firstNotFoundRetry: Float
     failOnFailedExpressions: Boolean
-    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace
-    messages: [messages]
-    failedManifests: [failedManifests]
-    kato_tasks: [kato_tasks]
-    outputs_manifests: [outputs_manifests]
-    deploy_jobs: deploy_jobs
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace @relation(name: "", direction: IN)
+    messages: [messages] @relation(name: "", direction: IN)
+    failedManifests: [failedManifests] @relation(name: "", direction: IN)
+    kato_tasks: [kato_tasks] @relation(name: "", direction: IN)
+    outputs_manifests: [outputs_manifests] @relation(name: "", direction: IN)
+    deploy_jobs: deploy_jobs @relation(name: "", direction: IN)
     hosturl: String
     job: String
-    parameters: parameters
+    parameters: parameters @relation(name: "", direction: IN)
     notification_type: String
     payloadConstraint: [String]
-    jobStatus: jobStatus
+    jobStatus: jobStatus @relation(name: "", direction: IN)
     consecutiveErrors: Float
     terminalStatuses: String
-    buildInfo: buildInfo
+    buildInfo: buildInfo @relation(name: "", direction: IN)
     credentials: String
-    completionDetails: completionDetails
+    completionDetails: completionDetails @relation(name: "", direction: IN)
     statusEndpoint: String
     Buildnumber: String
     GitBranch: String
     consumeArtifactSource: String
-    stableManifests: [stableManifests]
+    stableManifests: [stableManifests] @relation(name: "", direction: IN)
     GitRepo: String
     manifest_location: String
     cloudProvider: String
     kato_result_expected: Boolean
     manifest_name: String
-    deploy_server_groups: deploy_server_groups
-    trafficManagement: trafficManagement
+    deploy_server_groups: deploy_server_groups @relation(name: "", direction: IN)
+    trafficManagement: trafficManagement @relation(name: "", direction: IN)
     alias: String
     key: String
-    customHeaders: customHeaders
+    customHeaders: customHeaders @relation(name: "", direction: IN)
     statusJsonPath: String
-    expectedArtifacts: [expectedArtifacts]
+    expectedArtifacts: [expectedArtifacts] @relation(name: "", direction: IN)
     progressJsonPath: String
-    variables: [variables]
+    variables: [variables] @relation(name: "", direction: IN)
     comments: Float
     replicas: Float
-    manifest: manifest
+    manifest: manifest @relation(name: "", direction: IN)
     manifestName: String
     canceledStatuses: String
-    moniker: moniker
+    moniker: moniker @relation(name: "", direction: IN)
     waitForCompletion: Boolean
     url: String
     master: String
-    optionalArtifacts: [optionalArtifacts]
+    optionalArtifacts: [optionalArtifacts] @relation(name: "", direction: IN)
     application: String
-    outputs_boundArtifacts: [outputs_boundArtifacts]
+    outputs_boundArtifacts: [outputs_boundArtifacts] @relation(name: "", direction: IN)
     successStatuses: String
-    manifests: [manifests]
+    manifests: [manifests] @relation(name: "", direction: IN)
     report: String
     failPipeline: Boolean
     location: String
@@ -135,7 +135,7 @@ type context {
     account: String
     skipExpressionEvaluation: Boolean
     continuePipeline: Boolean
-    propertyFileContents: propertyFileContents
+    propertyFileContents: propertyFileContents @relation(name: "", direction: IN)
     kato_task_lastStatus: String
     
 }
@@ -147,7 +147,7 @@ type options {
 }
 
 type state {
-    terminated: terminated
+    terminated: terminated @relation(name: "", direction: IN)
     
 }
 
@@ -169,14 +169,14 @@ type tasks {
     endTime: Float
     loopEnd: Boolean
     implementingClass: String
-    status: status
+    status: status @relation(name: "", direction: IN)
     
 }
 
 type requiredArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     artifactAccount: String
     type: String
@@ -199,7 +199,7 @@ type avatarUrls {
 }
 
 type volumes {
-    configMap: configMap
+    configMap: configMap @relation(name: "", direction: IN)
     name: String
     
 }
@@ -216,7 +216,7 @@ type labels {
     app: String
     app_kubernetes_io_managed_by: String
     component: String
-    webhook: webhook
+    webhook: webhook @relation(name: "", direction: IN)
     job_name: String
     app_kubernetes_io_name: String
     version: String
@@ -225,17 +225,17 @@ type labels {
 }
 
 type outputs_manifests {
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     apiVersion: String
     kind: String
-    spec: spec
-    status: status
+    spec: spec @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
     
 }
 
 type assignee {
     accountId: String
-    avatarUrls: avatarUrls
+    avatarUrls: avatarUrls @relation(name: "", direction: IN)
     displayName: String
     accountType: String
     self: String
@@ -247,16 +247,16 @@ type assignee {
 type conditions {
     reason: String
     lastTransitionTime: Float
-    message: message
+    message: message @relation(name: "", direction: IN)
     type: String
     lastUpdateTime: String
-    status: status
+    status: status @relation(name: "", direction: IN)
     
 }
 
 type matchArtifact {
     customKind: Boolean
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     artifactAccount: String
     id: Float
@@ -271,7 +271,7 @@ type deploy_server_groups {
 type notifications {
     address: String
     level: String
-    message: message
+    message: message @relation(name: "", direction: IN)
     type: String
     when: [String]
     
@@ -280,44 +280,44 @@ type notifications {
 type status {
     retryable: Boolean
     phase: String
-    containerStatuses: [containerStatuses]
+    containerStatuses: [containerStatuses] @relation(name: "", direction: IN)
     hostIP: String
     replicas: Float
     readyReplicas: Float
     description: String
     completed: Boolean
     failed: Boolean
-    statusCategory: statusCategory
+    statusCategory: statusCategory @relation(name: "", direction: IN)
     updatedReplicas: Float
     availableReplicas: Float
-    podIPs: [podIPs]
+    podIPs: [podIPs] @relation(name: "", direction: IN)
     podIP: String
-    loadBalancer: loadBalancer
+    loadBalancer: loadBalancer @relation(name: "", direction: IN)
     name: String
     self: String
     startTime: Float
     qosClass: String
     iconUrl: String
     id: Float
-    conditions: [conditions]
+    conditions: [conditions] @relation(name: "", direction: IN)
     observedGeneration: Float
     
 }
 
 type template {
-    metadata: metadata
-    spec: spec
+    metadata: metadata @relation(name: "", direction: IN)
+    spec: spec @relation(name: "", direction: IN)
     
 }
 
 type jobStatus {
     provider: String
-    completionDetails: completionDetails
+    completionDetails: completionDetails @relation(name: "", direction: IN)
     jobState: String
     name: String
     createdTime: Float
     location: String
-    pods: [pods]
+    pods: [pods] @relation(name: "", direction: IN)
     account: String
     
 }
@@ -329,11 +329,11 @@ type buildInfo {
     name: String
     fullDisplayName: String
     id: Float
-    scm: [scm]
+    scm: [scm] @relation(name: "", direction: IN)
     building: Boolean
     url: String
     timestamp: String
-    artifacts: [artifacts]
+    artifacts: [artifacts] @relation(name: "", direction: IN)
     
 }
 
@@ -345,7 +345,7 @@ type pipeline_failed {
 type createdArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     location: String
     type: String
@@ -374,7 +374,7 @@ type deploy_jobs {
 }
 
 type trafficManagement {
-    options: options
+    options: options @relation(name: "", direction: IN)
     enabled: Boolean
     
 }
@@ -389,7 +389,7 @@ type variables {
 type creator {
     accountId: String
     emailAddress: String
-    avatarUrls: avatarUrls
+    avatarUrls: avatarUrls @relation(name: "", direction: IN)
     displayName: String
     accountType: String
     self: String
@@ -401,7 +401,7 @@ type creator {
 type reporter {
     accountId: String
     emailAddress: String
-    avatarUrls: avatarUrls
+    avatarUrls: avatarUrls @relation(name: "", direction: IN)
     displayName: String
     accountType: String
     self: String
@@ -411,20 +411,20 @@ type reporter {
 }
 
 type trigger {
-    expectedArtifacts: [expectedArtifacts]
+    expectedArtifacts: [expectedArtifacts] @relation(name: "", direction: IN)
     eventId: String
     dryRun: Boolean
     rebake: Boolean
     type: String
     enabled: Boolean
     executionId: String
-    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
-    strategy: strategy
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts] @relation(name: "", direction: IN)
+    strategy: strategy @relation(name: "", direction: IN)
     user: String
-    parameters: parameters
-    notifications: [notifications]
+    parameters: parameters @relation(name: "", direction: IN)
+    notifications: [notifications] @relation(name: "", direction: IN)
     preferred: Boolean
-    artifacts: [artifacts]
+    artifacts: [artifacts] @relation(name: "", direction: IN)
     
 }
 
@@ -441,43 +441,43 @@ type Pipeline {
     buildTime: Float
     spelEvaluator: String
     origin: String
-    trigger: trigger
+    trigger: trigger @relation(name: "", direction: IN)
     type: String
     canceled: Boolean
     limitConcurrent: Boolean
     application: String
-    initialConfig: initialConfig
+    initialConfig: initialConfig @relation(name: "", direction: IN)
     name: String
-    stages: [stages]
+    stages: [stages] @relation(name: "", direction: IN)
     startTime: Float
     id: Float
     endTime: Float
-    notifications: [notifications]
-    status: status
-    authentication: authentication
+    notifications: [notifications] @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
+    authentication: authentication @relation(name: "", direction: IN)
     
 }
 
 type customfield_10315 {
     hasEpicLinkFieldDependency: Boolean
     showField: Boolean
-    nonEditableReason: nonEditableReason
+    nonEditableReason: nonEditableReason @relation(name: "", direction: IN)
     
 }
 
 type manifests {
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     apiVersion: String
     kind: String
-    spec: spec
-    status: status
+    spec: spec @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
     
 }
 
 type outputs_boundArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     artifactAccount: String
     type: String
@@ -525,11 +525,11 @@ type propertyFileContents {
 }
 
 type outputs {
-    outputs_createdArtifacts: [outputs_createdArtifacts]
+    outputs_createdArtifacts: [outputs_createdArtifacts] @relation(name: "", direction: IN)
     reason: String
-    jobStatus: jobStatus
-    buildInfo: buildInfo
-    completionDetails: completionDetails
+    jobStatus: jobStatus @relation(name: "", direction: IN)
+    buildInfo: buildInfo @relation(name: "", direction: IN)
+    completionDetails: completionDetails @relation(name: "", direction: IN)
     Buildnumber: String
     GitBranch: String
     bimage: String
@@ -537,32 +537,32 @@ type outputs {
     prodimage: String
     canaryReportURL: String
     GitRepo: String
-    resolvedExpectedArtifacts: [resolvedExpectedArtifacts]
+    resolvedExpectedArtifacts: [resolvedExpectedArtifacts] @relation(name: "", direction: IN)
     startTime: Float
     key: String
-    artifacts: [artifacts]
-    requiredArtifacts: [requiredArtifacts]
+    artifacts: [artifacts] @relation(name: "", direction: IN)
+    requiredArtifacts: [requiredArtifacts] @relation(name: "", direction: IN)
     executedBy: String
     comments: Float
-    manifest: manifest
+    manifest: manifest @relation(name: "", direction: IN)
     overallScore: Float
     navigationalURL: String
-    trigger: trigger
+    trigger: trigger @relation(name: "", direction: IN)
     overallResult: String
-    message: message
+    message: message @relation(name: "", direction: IN)
     trigger_json: String
     cimage: String
-    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace
-    optionalArtifacts: [optionalArtifacts]
-    outputs_boundArtifacts: [outputs_boundArtifacts]
-    manifests: [manifests]
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace @relation(name: "", direction: IN)
+    optionalArtifacts: [optionalArtifacts] @relation(name: "", direction: IN)
+    outputs_boundArtifacts: [outputs_boundArtifacts] @relation(name: "", direction: IN)
+    manifests: [manifests] @relation(name: "", direction: IN)
     report: String
     canaryimage: String
-    outputs_manifests: [outputs_manifests]
+    outputs_manifests: [outputs_manifests] @relation(name: "", direction: IN)
     hosturl: String
     location: String
-    propertyFileContents: propertyFileContents
-    status: status
+    propertyFileContents: propertyFileContents @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
     
 }
 
@@ -580,11 +580,11 @@ type issuetype {
 }
 
 type webhook {
-    headers: headers
+    headers: headers @relation(name: "", direction: IN)
     statusEndpoint: String
     statusCodeValue: Float
-    monitor: monitor
-    body: body
+    monitor: monitor @relation(name: "", direction: IN)
+    body: body @relation(name: "", direction: IN)
     statusCode: String
     
 }
@@ -596,7 +596,7 @@ type pipeline_complete {
 
 type nonEditableReason {
     reason: String
-    message: message
+    message: message @relation(name: "", direction: IN)
     
 }
 
@@ -621,7 +621,7 @@ type annotations {
 
 type project {
     simplified: Boolean
-    avatarUrls: avatarUrls
+    avatarUrls: avatarUrls @relation(name: "", direction: IN)
     name: String
     self: String
     id: Float
@@ -641,13 +641,13 @@ type body {
     expand: String
     self: String
     id: Float
-    fields: fields
+    fields: fields @relation(name: "", direction: IN)
     key: String
     
 }
 
 type spec {
-    template: template
+    template: template @relation(name: "", direction: IN)
     dnsPolicy: String
     clusterIPs: [String]
     terminationGracePeriodSeconds: Float
@@ -656,18 +656,18 @@ type spec {
     replicas: Float
     parallelism: Float
     sessionAffinity: String
-    volumes: [volumes]
+    volumes: [volumes] @relation(name: "", direction: IN)
     completions: Float
-    securityContext: securityContext
-    ports: [ports]
+    securityContext: securityContext @relation(name: "", direction: IN)
+    ports: [ports] @relation(name: "", direction: IN)
     type: String
     restartPolicy: String
     ttlSecondsAfterFinished: Float
     ipFamilies: [String]
-    containers: [containers]
+    containers: [containers] @relation(name: "", direction: IN)
     revisionHistoryLimit: Float
-    selector: selector
-    strategy: strategy
+    selector: selector @relation(name: "", direction: IN)
+    strategy: strategy @relation(name: "", direction: IN)
     schedulerName: String
     progressDeadlineSeconds: Float
     clusterIP: String
@@ -684,10 +684,10 @@ type volumeMounts {
 type resolvedExpectedArtifacts {
     usePriorArtifact: Boolean
     useDefaultArtifact: Boolean
-    defaultArtifact: defaultArtifact
+    defaultArtifact: defaultArtifact @relation(name: "", direction: IN)
     id: Float
-    boundArtifact: boundArtifact
-    matchArtifact: matchArtifact
+    boundArtifact: boundArtifact @relation(name: "", direction: IN)
+    matchArtifact: matchArtifact @relation(name: "", direction: IN)
     
 }
 
@@ -700,7 +700,7 @@ type artifacts {
     reference: String
     customKind: Boolean
     fileName: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     relativePath: String
     name: String
     location: String
@@ -714,7 +714,7 @@ type artifacts {
 type parameterValues {
     summary: String
     cancel: String
-    issuetype: issuetype
+    issuetype: issuetype @relation(name: "", direction: IN)
     issue: String
     success: String
     description: String
@@ -725,7 +725,7 @@ type parameterValues {
 }
 
 type issuerestriction {
-    issuerestrictions: issuerestrictions
+    issuerestrictions: issuerestrictions @relation(name: "", direction: IN)
     shouldDisplay: Boolean
     
 }
@@ -744,15 +744,15 @@ type containerStatuses {
     ready: Boolean
     name: String
     started: Boolean
-    state: state
+    state: state @relation(name: "", direction: IN)
     containerID: String
-    lastState: lastState
+    lastState: lastState @relation(name: "", direction: IN)
     
 }
 
 type history {
     phase: String
-    status: status
+    status: status @relation(name: "", direction: IN)
     
 }
 
@@ -774,56 +774,56 @@ type containers {
     terminationMessagePolicy: String
     terminationMessagePath: String
     name: String
-    resources: resources
-    ports: [ports]
-    env: [env]
+    resources: resources @relation(name: "", direction: IN)
+    ports: [ports] @relation(name: "", direction: IN)
+    env: [env] @relation(name: "", direction: IN)
     command: [String]
-    volumeMounts: [volumeMounts]
+    volumeMounts: [volumeMounts] @relation(name: "", direction: IN)
     
 }
 
 type fields {
     statuscategorychangedate: String
-    issuetype: issuetype
-    components: components
-    project: project
+    issuetype: issuetype @relation(name: "", direction: IN)
+    components: components @relation(name: "", direction: IN)
+    project: project @relation(name: "", direction: IN)
     description: String
     customfield_10373: String
     fixVersions: String
-    resolution: resolution
-    timetracking: timetracking
+    resolution: resolution @relation(name: "", direction: IN)
+    timetracking: timetracking @relation(name: "", direction: IN)
     customfield_10105: String
     attachment: String
     resolutiondate: String
     workratio: Float
     summary: String
-    issuerestriction: issuerestriction
-    watches: watches
-    creator: creator
-    subtasks: subtasks
+    issuerestriction: issuerestriction @relation(name: "", direction: IN)
+    watches: watches @relation(name: "", direction: IN)
+    creator: creator @relation(name: "", direction: IN)
+    subtasks: subtasks @relation(name: "", direction: IN)
     created: String
-    reporter: reporter
-    aggregateprogress: aggregateprogress
-    priority: priority
-    customfield_10344: customfield_10344
+    reporter: reporter @relation(name: "", direction: IN)
+    aggregateprogress: aggregateprogress @relation(name: "", direction: IN)
+    priority: priority @relation(name: "", direction: IN)
+    customfield_10344: customfield_10344 @relation(name: "", direction: IN)
     customfield_10300: String
-    labels: labels
-    customfield_10315: customfield_10315
+    labels: labels @relation(name: "", direction: IN)
+    customfield_10315: customfield_10315 @relation(name: "", direction: IN)
     customfield_10317: String
-    versions: versions
+    versions: versions @relation(name: "", direction: IN)
     progress: Float
-    issuelinks: issuelinks
+    issuelinks: issuelinks @relation(name: "", direction: IN)
     votes: Float
-    comment: comment
-    assignee: assignee
-    worklog: worklog
+    comment: comment @relation(name: "", direction: IN)
+    assignee: assignee @relation(name: "", direction: IN)
+    worklog: worklog @relation(name: "", direction: IN)
     updated: String
-    status: status
+    status: status @relation(name: "", direction: IN)
     
 }
 
 type parameters {
-    connectors: [connectors]
+    connectors: [connectors] @relation(name: "", direction: IN)
     loadtime: String
     canarystarttime: Float
     log: String
@@ -847,7 +847,7 @@ type parameters {
 type completionDetails {
     reason: String
     exitCode: Float
-    message: message
+    message: message @relation(name: "", direction: IN)
     signal: String
     
 }
@@ -876,7 +876,7 @@ type lastState {
 type boundArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     artifactAccount: String
     type: String
@@ -890,7 +890,7 @@ type timetracking {
 type outputs_createdArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     location: String
     type: String
@@ -914,17 +914,17 @@ type loadBalancer {
 }
 
 type resultObjects {
-    createdArtifacts: [createdArtifacts]
-    deployedNamesByLocation: deployedNamesByLocation
-    manifests: [manifests]
-    manifestNamesByNamespace: manifestNamesByNamespace
-    boundArtifacts: [boundArtifacts]
+    createdArtifacts: [createdArtifacts] @relation(name: "", direction: IN)
+    deployedNamesByLocation: deployedNamesByLocation @relation(name: "", direction: IN)
+    manifests: [manifests] @relation(name: "", direction: IN)
+    manifestNamesByNamespace: manifestNamesByNamespace @relation(name: "", direction: IN)
+    boundArtifacts: [boundArtifacts] @relation(name: "", direction: IN)
     
 }
 
 type selector {
     app: String
-    matchLabels: matchLabels
+    matchLabels: matchLabels @relation(name: "", direction: IN)
     
 }
 
@@ -959,9 +959,9 @@ type expectedArtifacts {
     usePriorArtifact: Boolean
     displayName: String
     useDefaultArtifact: Boolean
-    defaultArtifact: defaultArtifact
+    defaultArtifact: defaultArtifact @relation(name: "", direction: IN)
     id: Float
-    matchArtifact: matchArtifact
+    matchArtifact: matchArtifact @relation(name: "", direction: IN)
     
 }
 
@@ -991,11 +991,11 @@ type headers {
 }
 
 type manifest {
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     apiVersion: String
     kind: String
-    spec: spec
-    status: status
+    spec: spec @relation(name: "", direction: IN)
+    status: status @relation(name: "", direction: IN)
     
 }
 
@@ -1005,15 +1005,15 @@ type resources {
 
 type defaultArtifact {
     customKind: Boolean
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     id: Float
     
 }
 
 type monitor {
-    headers: headers
+    headers: headers @relation(name: "", direction: IN)
     statusCodeValue: Float
-    body: body
+    body: body @relation(name: "", direction: IN)
     statusCode: String
     progressMessage: String
     
@@ -1027,7 +1027,7 @@ type moniker {
 type boundArtifact {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     type: String
     
@@ -1036,26 +1036,26 @@ type boundArtifact {
 type env {
     name: String
     value: Float
-    valueFrom: valueFrom
+    valueFrom: valueFrom @relation(name: "", direction: IN)
     
 }
 
 type message {
-    pipeline_complete: pipeline_complete
-    pipeline_starting: pipeline_starting
-    pipeline_failed: pipeline_failed
+    pipeline_complete: pipeline_complete @relation(name: "", direction: IN)
+    pipeline_starting: pipeline_starting @relation(name: "", direction: IN)
+    pipeline_failed: pipeline_failed @relation(name: "", direction: IN)
     
 }
 
 type valueFrom {
-    secretKeyRef: secretKeyRef
+    secretKeyRef: secretKeyRef @relation(name: "", direction: IN)
     
 }
 
 type optionalArtifacts {
     customKind: Boolean
     reference: String
-    metadata: metadata
+    metadata: metadata @relation(name: "", direction: IN)
     name: String
     location: String
     type: String
@@ -1073,23 +1073,24 @@ type deployedNamesByLocation {
 }
 
 type stages {
-    outputs: outputs
+    nextStage: stages @relation(name: "NEXT_STAGE", direction: OUT)
+    outputs: outputs @relation(name: "OUTPUTS", direction: OUT)
     requisiteStageRefIds: [String]
     name: String
-    context: context
+    context: context @relation(name: "CONTEXTUALIZES", direction: OUT)
     startTime: Float
     id: Float
     refId: String
     endTime: Float
     type: String
-    tasks: [tasks]
-    status: status
+    tasks: [tasks] @relation(name: "REQUIRED_TASKS", direction: OUT)
+    status: status @relation(name: "STATUS", direction: OUT)
     
 }
 
 type pods {
     name: String
-    status: status
+    status: status @relation(name: "", direction: IN)
     
 }
 
@@ -1104,7 +1105,7 @@ type comment {
 
 type strategy {
     type: String
-    rollingUpdate: rollingUpdate
+    rollingUpdate: rollingUpdate @relation(name: "", direction: IN)
     
 }
 

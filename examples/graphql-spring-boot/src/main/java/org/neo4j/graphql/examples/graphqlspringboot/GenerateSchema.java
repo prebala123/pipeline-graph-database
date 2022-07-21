@@ -8,10 +8,50 @@ import java.util.*;
 
 public class GenerateSchema {
 
+    static HashMap<String, String[]> info = new HashMap<>();
+    static HashMap<String, HashSet<String>> otherFields = new HashMap<>();
+
     static String schemaFile = "C:/Users/rebal/pipeline/pipelinedb/examples/graphql-spring-boot/src/main/java/org/neo4j/graphql/examples/graphqlspringboot/PipelineSchema.txt";
 
     public static void main(String[] args) {
+        //add relationships and fields first
+        addRelationships();
+        addFields();
         makeSchema();
+    }
+
+    public static void addRelationships() {
+        //add all relationships here
+        addRelationInfo("stages", "outputs", "OUTPUTS", "OUT");
+        addRelationInfo("stages", "context", "CONTEXTUALIZES", "OUT");
+        addRelationInfo("stages", "tasks", "REQUIRED_TASKS", "OUT");
+        addRelationInfo("stages", "status", "STATUS", "OUT");
+    }
+
+    public static void addFields() {
+        //add our own fields not defined by JSON
+        addOtherData("stages", "nextStage: stages @relation(name: \"NEXT_STAGE\", direction: OUT)");
+    }
+
+    public static void addRelationInfo(String node, String field, String relationship, String direction) {
+        info.put(node + "->" + field, new String[]{relationship, direction});
+    }
+
+    public static void addOtherData(String node, String field) {
+        if (otherFields.containsKey(node))
+            otherFields.get(node).add(field);
+        else {
+            HashSet<String> hs = new HashSet<>();
+            hs.add(field);
+            otherFields.put(node, hs);
+        }
+    }
+
+    public static String[] getRelationInfo(String node, String field) {
+        if (info.containsKey(node + "->" + field))
+            return info.get(node + "->" + field);
+        else
+            return new String[]{"", "IN"};
     }
 
     public static void makeSchema() {
@@ -24,16 +64,23 @@ public class GenerateSchema {
             String key2 = entry2.getKey();
             HashSet<String> value2 = entry2.getValue();
             finalSchema += "type " + cleanType(key2) + " {\n    ";
+            if (otherFields.containsKey(key2)){
+                for (String s: otherFields.get(key2))
+                    finalSchema += s + "\n    ";
+            }
             for (String s : value2) {
                 String dataType = getKeyByValue(fieldTypes, s);
-                s = cleanFields(s);
-                if (dataType.equals("Object"))
-                    dataType = s;
-                if (dataType.equals("Array"))
-                    dataType = "[" + s + "]";
+                if (dataType.equals("Object")) {
+                    String[] info = getRelationInfo(key2, s);
+                    dataType = cleanFields(s) + " @relation(name: \""+info[0]+"\", direction: "+info[1]+")";
+                }
+                if (dataType.equals("Array")) {
+                    String[] info = getRelationInfo(key2, s);
+                    dataType = "[" + cleanFields(s) + "] @relation(name: \""+info[0]+"\", direction: "+info[1]+")";
+                }
                 if (dataType.equals("StringArr") || dataType.equals("Other"))
                     dataType = "[String]";
-                finalSchema += s + ": " + dataType + "\n    ";
+                finalSchema += cleanFields(s) + ": " + dataType + "\n    ";
             }
             finalSchema += "\n}\n\n";
         }

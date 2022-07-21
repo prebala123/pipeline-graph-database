@@ -109,15 +109,13 @@ public class PopulateDatabase implements AutoCloseable {
             for (String i: replacements) {
                 k2 = k2.replace(i, "_");
             }
+            if (Character.isDigit(k2.charAt(0)))
+                k2 = "_" + k2;
 
             if (hm.get("Other").contains(k)) {
                 lst.add(k2+": "+jo.get(k));
             }
             else if (hm.get("String").contains(k)){
-                if (type.equals("avatarUrls")) {
-                    //fix later
-                    continue;
-                }
                 lst.add(k2 + ": \"" + ((String) jo.get(k)).replace("\"", "\\\"") + "\"");
             }
             else if (hm.get("Array").contains(k)) {

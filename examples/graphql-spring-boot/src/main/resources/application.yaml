@@ -1,17 +1,12 @@
-org :
-  neo4j :
-    driver :
-      uri : neo4j://localhost:7687
-      authentication :
-        username : neo4j
-        password : movies
-      config :
-        encrypted : false
-database : neo4j
-spring :
-  graphql :
-    schema :
-      printer :
-        enabled : true
-    graphiql :
-      enabled : true
+org:
+  neo4j:
+    driver:
+      uri: neo4j://localhost
+      authentication: {username: neo4j, password: movies}
+      config: {encrypted: false}
+database: neo4j
+spring:
+  graphql:
+    schema:
+      printer: {enabled: true}
+    graphiql: {enabled: true}

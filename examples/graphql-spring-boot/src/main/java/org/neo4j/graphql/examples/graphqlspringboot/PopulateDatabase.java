@@ -1,5 +1,6 @@
 package org.neo4j.graphql.examples.graphqlspringboot;
 
+import graphql.com.google.common.base.Charsets;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
@@ -11,6 +12,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,13 +122,16 @@ public class PopulateDatabase implements AutoCloseable {
         return jo;
     }
 
-    public void addPipeline(JSONObject jo, String type, String id) {
+    public void addPipeline(JSONObject jo, String type, String id, String pipelineId) {
         HashMap<String, HashSet<String>> hm = separateFields(jo);
         Iterator<String> it = jo.keys();
         Iterator<String> it2 = jo.keys();
         ArrayList<String> lst = new ArrayList<>();
         ArrayList<String> replacements = new ArrayList<>(Arrays.asList(".", "/", "-"));
         type = type.replace(".", "_");
+
+        if (type.equals("expressionEvaluationSummary"))
+            System.out.println("here");
 
         String cypher = "";
         if (id != null) {
@@ -135,6 +141,7 @@ public class PopulateDatabase implements AutoCloseable {
 
         while (it.hasNext()) {
             String k = it.next();
+            //System.out.println(k);
 
             String k2 = new String(k.toCharArray());
 
@@ -144,11 +151,23 @@ public class PopulateDatabase implements AutoCloseable {
             if (Character.isDigit(k2.charAt(0)))
                 k2 = "_" + k2;
 
+            if (k.equals("expressionEvaluationSummary")) {
+                lst.add(k2 + ": \"" + (jo.getJSONObject(k).toString())
+                        .replace("\\", "/")
+                        .replace("\"", "\\\"")
+                        //.replace("/", "\\")
+                        + "\"");
+            }
+
             if (hm.get("Other").contains(k)) {
                 lst.add(k2+": "+jo.get(k));
             }
             else if (hm.get("String").contains(k)){
-                lst.add(k2 + ": \"" + ((String) jo.get(k)).replace("\"", "\\\"") + "\"");
+                lst.add(k2 + ": \"" + ((String) jo.get(k))
+                        .replace("\\", "/")
+                        .replace("\"", "\\\"")
+                        //.replace("/", "\\")
+                        + "\"");
             }
             else if (hm.get("Array").contains(k)) {
                 JSONArray arr = jo.getJSONArray(k);
@@ -159,6 +178,7 @@ public class PopulateDatabase implements AutoCloseable {
                 }
             }
         }
+        lst.add("pipelineId: \"" + pipelineId + "\"");
         String fields = String.join(", ", lst);
         cypher += fields + "})";
         if (id != null) {
@@ -169,6 +189,8 @@ public class PopulateDatabase implements AutoCloseable {
         String finalCypher = cypher;
         String nodeId = null;
 
+        //System.out.println(finalCypher);
+
         try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
@@ -178,6 +200,7 @@ public class PopulateDatabase implements AutoCloseable {
             nodeId = nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">"));
             //System.out.println(type + ": " + nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">")));
         } catch (Neo4jException ex) {
+            System.out.println(finalCypher);
             LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
             throw ex;
         }
@@ -191,28 +214,29 @@ public class PopulateDatabase implements AutoCloseable {
             }
 
             if (hm.get("Object").contains(k)){
-                addPipeline(jo.getJSONObject(k), k, nodeId);
+                if (k.equals("expressionEvaluationSummary"))
+                    continue;
+                addPipeline(jo.getJSONObject(k), k, nodeId, pipelineId);
             }
             else if (hm.get("Array").contains(k)) {
                 JSONArray arr = jo.getJSONArray(k);
                 for (int i = 0; i < arr.length(); i++) {
                     if (arr.get(i) instanceof JSONObject) {
-                        addPipeline(arr.getJSONObject(i), k, nodeId);
+                        addPipeline(arr.getJSONObject(i), k, nodeId, pipelineId);
                     }
                 }
             }
         }
     }
 
-    public void addPrevStages() {
-        JSONObject jo2 = readJSON();
+    public void addPrevStages(JSONObject jo2, String pipelineId) {
         JSONArray stages = jo2.getJSONArray("stages");
         for (int i = 0; i < stages.length(); i++) {
             String id = (String) stages.getJSONObject(i).get("refId");
             JSONArray prevs = (JSONArray) stages.getJSONObject(i).get("requisiteStageRefIds");
             if (prevs.length() == 0) {
-                String finalCypher = "MATCH (s1:trigger { executionId: \""+jo2.get("id")+"\"}) " +
-                        "MATCH (s2:stages { refId: \""+id+"\"}) CREATE (s1) - [:NEXT] -> (s2) RETURN s2";
+                String finalCypher = "MATCH (s1:trigger { executionId: \""+jo2.get("id")+"\", pipelineId: \""+pipelineId+"\"}) " +
+                        "MATCH (s2:stages { refId: \""+id+"\", pipelineId: \""+pipelineId+"\"}) CREATE (s1) - [:NEXT] -> (s2) RETURN s2";
 
                 try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
                     Record record = session.writeTransaction(tx -> {
@@ -220,13 +244,14 @@ public class PopulateDatabase implements AutoCloseable {
                         return result.single();
                     });
                 } catch (Neo4jException ex) {
+                    System.out.println(finalCypher);
                     LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
                     throw ex;
                 }
             }
             for (int j = 0; j < prevs.length(); j++) {
-                String finalCypher = "MATCH (s1:stages { refId: \""+prevs.get(j)+"\"}) " +
-                        "MATCH (s2:stages { refId: \""+id+"\"}) MATCH (o1:outputs) <- [:NEXT] - (s1)  " +
+                String finalCypher = "MATCH (s1:stages { refId: \""+prevs.get(j)+"\", pipelineId: \""+pipelineId+"\"}) " +
+                        "MATCH (s2:stages { refId: \""+id+"\", pipelineId: \""+pipelineId+"\"}) MATCH (o1:outputs) <- [:NEXT] - (s1)  " +
                         "MATCH (c1:context) <- [:NEXT] - (s2) CREATE (s1) - [:NEXT] -> (s2) " +
                         "CREATE (o1) - [:NEXT] -> (c1) RETURN s1";
 
@@ -236,6 +261,7 @@ public class PopulateDatabase implements AutoCloseable {
                         return result.single();
                     });
                 } catch (Neo4jException ex) {
+                    System.out.println(finalCypher);
                     LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
                     throw ex;
                 }
@@ -243,19 +269,107 @@ public class PopulateDatabase implements AutoCloseable {
         }
     }
 
-    public static void main(String[] args){
-        // Aura queries use an encrypted connection using the "neo4j+s" protocol
-         String uri = GraphqlSpringBootApplication.uri;
-         String user = GraphqlSpringBootApplication.user;
-         String password = GraphqlSpringBootApplication.password;
+    public static boolean populate(JSONObject jo) {
+        String uri = GraphqlSpringBootApplication.uri;
+        String user = GraphqlSpringBootApplication.user;
+        String password = GraphqlSpringBootApplication.password;
 
         try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
-            app.deleteAll();
-            JSONObject jo = readJSON();
-            app.addPipeline(jo, "Pipeline", null);
-            app.addPrevStages();
+            //app.deleteAll();
+            if (jo.has("stages")) {
+                app.addPipeline(jo, "Pipeline", null, jo.getString("id"));
+                app.addPrevStages(jo, jo.getString("id"));
+            }
+            return true;
+        } catch (Exception e) {
+            System.out.println("fail");
+            deleteWithId(jo.getString("id"));
+            return false;
+        }
+    }
+
+    public static void deleteWithId(String pipelineId) {
+        String uri = GraphqlSpringBootApplication.uri;
+        String user = GraphqlSpringBootApplication.user;
+        String password = GraphqlSpringBootApplication.password;
+
+        try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
+            app.deleteWithIdHelper(pipelineId);
         } catch (Exception e) {
             System.out.println("fail");
         }
+    }
+
+    public void deleteWithIdHelper(String pipelineId) {
+        String finalCypher = "MATCH (a {pipelineId: \""+pipelineId+"\"}) DETACH DELETE a";
+
+        try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+            Record record = session.writeTransaction(tx -> {
+                Result result = tx.run(finalCypher);
+                //return result.single();
+                return null;
+            });
+        } catch (Neo4jException ex) {
+            LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
+            throw ex;
+        }
+    }
+
+    public static Object readJSON2() {
+        String path = GraphqlSpringBootApplication.dataPath;
+        Object jo = null;
+        try {
+            File myObj = new File(path);
+            Scanner myReader = new Scanner(myObj);
+            String allJson = Files.readString(Path.of(GraphqlSpringBootApplication.dataPath));
+            if (allJson.charAt(0) == '[')
+                jo = new JSONArray(allJson);
+            else
+                jo = new JSONObject(allJson);
+            myReader.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return jo;
+    }
+
+    public static void fullPopulate() {
+        int count = 0;
+        boolean populated = false;
+        Object jo = readJSON2();
+        if (jo instanceof JSONArray) {
+            for (Object obj: (JSONArray) jo) {
+                count++;
+                System.out.println(count);
+                populated = populate((JSONObject) obj);
+                if (!populated)
+                    deletedPipelines.add(count);
+            }
+        }
+        else {
+            populate((JSONObject) jo);
+        }
+    }
+
+    public static HashSet<Integer> deletedPipelines = new HashSet<>();
+
+    public static void main(String[] args){
+        String uri = GraphqlSpringBootApplication.uri;
+        String user = GraphqlSpringBootApplication.user;
+        String password = GraphqlSpringBootApplication.password;
+
+        try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
+            app.deleteAll();
+        } catch (Exception e) {
+            System.out.println("fail");
+        }
+        deletedPipelines = new HashSet<>();
+
+        fullPopulate();
+        System.out.println("finished");
+        System.out.println(deletedPipelines);
     }
 }

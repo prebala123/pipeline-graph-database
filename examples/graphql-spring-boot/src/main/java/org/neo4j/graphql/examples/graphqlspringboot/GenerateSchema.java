@@ -4,6 +4,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class GenerateSchema {
@@ -55,7 +57,7 @@ public class GenerateSchema {
     }
 
     public static void makeSchema() {
-        JSONObject jo = readJSON();
+        JSONObject jo = ((JSONArray) readJSON2()).getJSONObject(0);
         HashMap<String, HashSet<String>> fieldTypes = separateAllFields(jo);
         HashMap<String, HashSet<String>> schema = new HashMap<>();
         readPipeline(jo, "Pipeline", schema, fieldTypes);
@@ -178,21 +180,22 @@ public class GenerateSchema {
         }
     }
 
-    public static JSONObject readJSON() {
+    public static Object readJSON2() {
         String path = GraphqlSpringBootApplication.dataPath;
-        JSONObject jo = null;
+        Object jo = null;
         try {
             File myObj = new File(path);
             Scanner myReader = new Scanner(myObj);
-            String allJson = "";
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                allJson += data;
-            }
-            jo = new JSONObject(allJson);
+            String allJson = Files.readString(Path.of(GraphqlSpringBootApplication.dataPath));
+            if (allJson.charAt(0) == '[')
+                jo = new JSONArray(allJson);
+            else
+                jo = new JSONObject(allJson);
             myReader.close();
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return jo;

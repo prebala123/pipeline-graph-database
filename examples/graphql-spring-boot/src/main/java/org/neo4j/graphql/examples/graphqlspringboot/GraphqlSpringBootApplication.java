@@ -24,7 +24,6 @@ public class GraphqlSpringBootApplication {
 
     public static void main(String[] args) {
         System.out.println("starting");
-        //System.out.println(uri);
         //PopulateDatabase.updateYAML();
         //GenerateSchema.main(null);
         SpringApplication.run(GraphqlSpringBootApplication.class, args);

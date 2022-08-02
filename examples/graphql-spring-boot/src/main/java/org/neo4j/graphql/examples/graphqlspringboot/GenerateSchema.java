@@ -57,14 +57,26 @@ public class GenerateSchema {
     }
 
     public static void makeSchema() {
-        JSONObject jo = ((JSONArray) readJSON2()).getJSONObject(0);
-        HashMap<String, HashSet<String>> fieldTypes = separateAllFields(jo);
+        Object obj = readJSON2();
+        JSONObject jo = new JSONObject();
+        HashMap<String, HashSet<String>> fieldTypes;
         HashMap<String, HashSet<String>> schema = new HashMap<>();
-        readPipeline(jo, "Pipeline", schema, fieldTypes);
+        if (obj instanceof JSONObject) {
+            jo = (JSONObject) obj;
+            fieldTypes = separateAllFields(jo);
+            readPipeline(jo, "Pipeline", schema, fieldTypes);
+        } else {
+            JSONArray arr = (JSONArray) obj;
+            jo.put("Pipeline", arr);
+            fieldTypes = separateAllFields(jo);
+            readPipeline(jo, "AllPipelines", schema, fieldTypes);
+        }
         String finalSchema = "";
         String queries = "type Query {\n    ";
         for (HashMap.Entry<String, HashSet<String>> entry2 : schema.entrySet()) {
             String key2 = entry2.getKey();
+            if (key2.equals("expressionEvaluationSummary") || key2.charAt(0) == '{' || key2.charAt(0) == '#')
+                continue;
             HashSet<String> value2 = entry2.getValue();
             finalSchema += "type " + cleanType(key2) + " {\n    ";
             queries += cleanType(key2) + ": [" + cleanType(key2) + "]\n    ";
@@ -87,6 +99,8 @@ public class GenerateSchema {
                 }
                 if (dataType.equals("StringArr") || dataType.equals("Other"))
                     dataType = "[String]";
+                if (s.equals("expressionEvaluationSummary"))
+                    dataType = "String";
                 finalSchema += cleanFields(s) + ": " + dataType + "\n    ";
             }
             finalSchema += "\n}\n\n";

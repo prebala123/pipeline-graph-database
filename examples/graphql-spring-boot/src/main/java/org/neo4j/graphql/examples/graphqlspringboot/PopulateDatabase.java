@@ -36,7 +36,7 @@ public class PopulateDatabase implements AutoCloseable {
     public void deleteAll() {
         String finalCypher = "MATCH (a) DETACH DELETE a";
 
-        try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+        try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
                 //return result.single();
@@ -191,7 +191,7 @@ public class PopulateDatabase implements AutoCloseable {
 
         //System.out.println(finalCypher);
 
-        try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+        try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
                 return result.single();
@@ -238,7 +238,7 @@ public class PopulateDatabase implements AutoCloseable {
                 String finalCypher = "MATCH (s1:trigger { executionId: \""+jo2.get("id")+"\", pipelineId: \""+pipelineId+"\"}) " +
                         "MATCH (s2:stages { refId: \""+id+"\", pipelineId: \""+pipelineId+"\"}) CREATE (s1) - [:NEXT] -> (s2) RETURN s2";
 
-                try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+                try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
                     Record record = session.writeTransaction(tx -> {
                         Result result = tx.run(finalCypher);
                         return result.single();
@@ -255,7 +255,7 @@ public class PopulateDatabase implements AutoCloseable {
                         "MATCH (c1:context) <- [:NEXT] - (s2) CREATE (s1) - [:NEXT] -> (s2) " +
                         "CREATE (o1) - [:NEXT] -> (c1) RETURN s1";
 
-                try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+                try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
                     Record record = session.writeTransaction(tx -> {
                         Result result = tx.run(finalCypher);
                         return result.single();
@@ -303,7 +303,7 @@ public class PopulateDatabase implements AutoCloseable {
     public void deleteWithIdHelper(String pipelineId) {
         String finalCypher = "MATCH (a {pipelineId: \""+pipelineId+"\"}) DETACH DELETE a";
 
-        try (Session session = driver.session(SessionConfig.forDatabase("neo4j"))) {
+        try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
                 //return result.single();

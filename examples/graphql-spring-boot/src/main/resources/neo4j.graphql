@@ -1,31 +1,709 @@
 type outputs {
+    set_manifest_as_default: String
+    outputs_createdArtifacts: [outputs_createdArtifacts] @relation(name: "NEXT", direction: OUT)
+    source_manifest: source_manifest @relation(name: "NEXT", direction: OUT)
+    tenant_manifest_id: String
+    namespaceValue: String
+    updatedDate: String
+    config_svc_domain: String
+    source_manifest_id: String
+    manifest_is_staged: Boolean
+    _short_region: String
+    _tenant_admin_pass: String
+    context: context @relation(name: "NEXT", direction: OUT)
     id: String
-    
-}
-
-type template {
-    spec: spec @relation(name: "NEXT", direction: OUT)
-    
-}
-
-type variables {
+    devmt_account_id: String
+    tenant_status: String
+    tenant: String
+    artifacts: [artifacts] @relation(name: "NEXT", direction: OUT)
+    _tenant_admin_last: String
+    _assign_source_json_first: String
+    qa_account_name: String
+    updatedBy: String
+    prod_account_id: String
+    _assign_source_json_pass: String
+    new_index: String
+    index: String
+    committed_status: String
+    tenant_ids: String
+    _assign_source_json_last: String
+    cloudwatch_base_url: String
+    the_manifest: String
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace @relation(name: "NEXT", direction: OUT)
+    dev_account_name: String
+    outputs_manifests: [outputs_manifests] @relation(name: "NEXT", direction: OUT)
+    _tenant_admin_first: String
+    region: String
+    update_tenant_manifests: String
+    shouldRefreshManifestNamesByNamespaceToRefresh: Boolean
+    manifest_id: String
+    _assign_source_json_name: String
+    status: String
+    tenant_id: String
+    jobStatus: jobStatus @relation(name: "NEXT", direction: OUT)
+    code: String
+    ssl_no_verify: String
+    completionDetails: completionDetails @relation(name: "NEXT", direction: OUT)
+    _assign_source_json_mail: String
+    platform: String
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    tenant_manifest_tag: String
+    tenant_status_tag: String
+    _split_region: [String]
+    short_region: String
+    staged_manifest_id: String
+    account_name: String
+    pending_status: String
+    eTag: String
     value: String
+    qamt_account_id: String
+    qa_account_id: String
+    tenant_is_reserved: Boolean
     key: String
+    owner: String
+    debug: String
+    log_group: String
+    dev_account_id: String
+    manifest: String
+    tenant_manifest: String
+    staged_status: String
+    staged: Boolean
+    env: String
+    message: String
+    converted_manifest: String
+    example_manifest: String
+    createdDate: String
+    account_id: String
+    tenant_is_vacant: Boolean
+    prod_account_name: String
+    manifestNamesByNamespaceToRefresh: manifestNamesByNamespaceToRefresh @relation(name: "NEXT", direction: OUT)
+    outputs_boundArtifacts: [String]
+    createdBy: String
+    new_tenant_manifest_id: String
+    namespace: String
+    propertyFileContents: propertyFileContents @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type exception {
+    exceptionType: String
+    shouldRetry: Boolean
+    details: details @relation(name: "NEXT", direction: OUT)
+    source: String
+    operation: String
+    timestamp: Float
     
 }
 
 type metadata {
+    uid: String
+    resourceVersion: String
     name: String
     namespace: String
+    creationTimestamp: String
+    annotations: annotations @relation(name: "NEXT", direction: OUT)
+    account: String
+    labels: labels @relation(name: "NEXT", direction: OUT)
+    selfLink: String
+    
+}
+
+type source_manifest {
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type startedAt {
+    dayOfYear: Float
+    equalNow: Boolean
+    year: Float
+    weekyear: Float
+    chronology: chronology @relation(name: "NEXT", direction: OUT)
+    weekOfWeekyear: Float
+    secondOfMinute: Float
+    millisOfDay: Float
+    monthOfYear: Float
+    beforeNow: Boolean
+    dayOfWeek: Float
+    minuteOfDay: Float
+    dayOfMonth: Float
+    era: Float
+    zone: zone @relation(name: "NEXT", direction: OUT)
+    yearOfCentury: Float
+    centuryOfEra: Float
+    hourOfDay: Float
+    secondOfDay: Float
+    millis: Float
+    yearOfEra: Float
+    minuteOfHour: Float
+    afterNow: Boolean
+    millisOfSecond: Float
+    
+}
+
+type chronology {
+    zone: zone @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type annotations {
+    artifact_spinnaker_io_name: String
+    artifact_spinnaker_io_location: String
+    artifact_spinnaker_io_type: String
+    kubectl_kubernetes_io_last_applied_configuration: String
+    moniker_spinnaker_io_cluster: String
+    moniker_spinnaker_io_application: String
+    
+}
+
+type deployedManifests {
+    name: String
+    location: String
+    account: String
+    
+}
+
+type kato_tasks {
+    resultObjects: [resultObjects] @relation(name: "NEXT", direction: OUT)
+    id: String
+    history: [history] @relation(name: "NEXT", direction: OUT)
+    status: String
+    
+}
+
+type manifestNamesByNamespace {
+    kronos: [String]
+    
+}
+
+type stageEnabled {
+    expression: String
+    type: String
+    
+}
+
+type parameters_tenant {
+    level: String
+    description: String
+    timestamp: Float
+    
+}
+
+type securityContext {
+    id: String
+    
+}
+
+type source {
+    executionId: String
+    stageIndex: Float
+    stageName: String
+    stageId: String
+    
+}
+
+type spec {
+    template: template @relation(name: "NEXT", direction: OUT)
+    dnsPolicy: String
+    terminationGracePeriodSeconds: Float
+    backoffLimit: Float
+    imagePullSecrets: [imagePullSecrets] @relation(name: "NEXT", direction: OUT)
+    parallelism: Float
+    completions: Float
+    containers: [containers] @relation(name: "NEXT", direction: OUT)
+    selector: selector @relation(name: "NEXT", direction: OUT)
+    securityContext: securityContext @relation(name: "NEXT", direction: OUT)
+    restartPolicy: String
+    schedulerName: String
+    
+}
+
+type zone {
+    fixed: Boolean
+    id: String
+    
+}
+
+type AllPipelines {
+    Pipeline: [Pipeline] @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type context {
+    exception: exception @relation(name: "NEXT", direction: OUT)
+    deploy_account_name: String
+    outputs_createdArtifacts: [outputs_createdArtifacts] @relation(name: "NEXT", direction: OUT)
+    resourceId: String
+    propertyFile: String
+    expressionEvaluationSummary: String
+    deployedManifests: [deployedManifests] @relation(name: "NEXT", direction: OUT)
+    namespaceValue: String
+    stageEnabled: stageEnabled @relation(name: "NEXT", direction: OUT)
+    source: String
+    updatedDate: String
+    processed_scopedManifests: [processed_scopedManifests] @relation(name: "NEXT", direction: OUT)
+    type: String
+    context: context @relation(name: "NEXT", direction: OUT)
+    id: String
+    kato_last_task_id: kato_last_task_id @relation(name: "NEXT", direction: OUT)
+    artifacts: [artifacts] @relation(name: "NEXT", direction: OUT)
+    updatedBy: String
+    kato_task_terminalRetryCount: Float
+    refreshed_scopedManifests: [refreshed_scopedManifests] @relation(name: "NEXT", direction: OUT)
+    tenant_ids: String
+    kato_task_firstNotFoundRetry: Float
+    executionId: String
+    executionName: String
+    failOnFailedExpressions: Boolean
+    outputs_manifestNamesByNamespace: outputs_manifestNamesByNamespace @relation(name: "NEXT", direction: OUT)
+    preconditions: [preconditions] @relation(name: "NEXT", direction: OUT)
+    kato_tasks: [kato_tasks] @relation(name: "NEXT", direction: OUT)
+    deploy_jobs: deploy_jobs @relation(name: "NEXT", direction: OUT)
+    outputs_manifests: [outputs_manifests] @relation(name: "NEXT", direction: OUT)
+    shouldRefreshManifestNamesByNamespaceToRefresh: Boolean
+    errors: [String]
+    expressionResult: String
+    status: String
+    notification_type: String
+    jobStatus: jobStatus @relation(name: "NEXT", direction: OUT)
+    code: String
+    pipelineParameters: pipelineParameters @relation(name: "NEXT", direction: OUT)
+    credentials: String
+    completionDetails: completionDetails @relation(name: "NEXT", direction: OUT)
+    consumeArtifactSource: String
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    cloudProvider: String
+    kato_result_expected: Boolean
+    alias: String
+    deploy_server_groups: deploy_server_groups @relation(name: "NEXT", direction: OUT)
+    eTag: String
+    value: String
+    key: String
+    variables: [variables] @relation(name: "NEXT", direction: OUT)
+    comments: String
+    expression: String
+    preconditionType: String
+    manifest: String
+    waitForCompletion: Boolean
+    staged: Boolean
+    message: String
+    pipeline: String
+    createdDate: String
+    application: String
+    manifestNamesByNamespaceToRefresh: manifestNamesByNamespaceToRefresh @relation(name: "NEXT", direction: OUT)
+    outputs_boundArtifacts: [String]
+    createdBy: String
+    namespace: String
+    completeOtherBranchesThenFail: Boolean
+    failPipeline: Boolean
+    kato_task_notFoundRetryCount: Float
+    account: String
+    continuePipeline: Boolean
+    kato_task_lastStatus: String
+    propertyFileContents: propertyFileContents @relation(name: "NEXT", direction: OUT)
+    resourceType: String
+    
+}
+
+type kato_last_task_id {
+    id: String
+    
+}
+
+type details {
+    kind: String
+    stackTrace: String
+    error: String
+    errors: [String]
+    
+}
+
+type state {
+    terminated: terminated @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type tasks {
+    stageStart: Boolean
+    loopStart: Boolean
+    stageEnd: Boolean
+    name: String
+    startTime: Float
+    id: String
+    endTime: Float
+    loopEnd: Boolean
+    implementingClass: String
+    status: String
+    
+}
+
+type artifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    name: String
+    location: String
+    type: String
+    
+}
+
+type matchLabels {
+    controller_uid: String
+    
+}
+
+type containerStatuses {
+    image: String
+    imageID: String
+    restartCount: Float
+    ready: Boolean
+    name: String
+    state: state @relation(name: "NEXT", direction: OUT)
+    containerID: String
+    lastState: lastState @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type history {
+    phase: String
+    status: String
+    
+}
+
+type labels {
+    app_kubernetes_io_managed_by: String
+    job_name: String
+    app_kubernetes_io_name: String
+    controller_uid: String
+    
+}
+
+type preconditions {
+    context: context @relation(name: "NEXT", direction: OUT)
+    failPipeline: Boolean
+    type: String
+    
+}
+
+type outputs_manifests {
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    apiVersion: String
+    kind: String
+    spec: spec @relation(name: "NEXT", direction: OUT)
+    status: String
+    
+}
+
+type containers {
+    image: String
+    imagePullPolicy: String
+    terminationMessagePolicy: String
+    terminationMessagePath: String
+    name: String
+    resources: resources @relation(name: "NEXT", direction: OUT)
+    env: String
+    
+}
+
+type refreshed_scopedManifests {
+    name: String
+    location: String
+    account: String
+    
+}
+
+type conditions {
+    reason: String
+    lastTransitionTime: lastTransitionTime @relation(name: "NEXT", direction: OUT)
+    type: String
+    message: String
+    status: String
+    
+}
+
+type parameters {
+    set_manifest_as_default: String
+    tenant_id: String
+    debug: String
+    manifest: String
+    link: String
+    new_index: String
+    index: String
+    tenant_ids: String
+    env: String
+    list: String
+    platform: String
+    source_manifest_id: String
+    parallel: String
+    region: String
+    update_tenant_manifests: String
+    manifest_id: String
+    tenant: String
+    status: String
+    
+}
+
+type deploy_server_groups {
+    id: String
+    
+}
+
+type status {
+    phase: String
+    retryable: Boolean
+    podIP: String
+    containerStatuses: [containerStatuses] @relation(name: "NEXT", direction: OUT)
+    hostIP: String
+    startTime: Float
+    qosClass: String
+    completed: Boolean
+    failed: Boolean
+    conditions: [conditions] @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type template {
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    spec: spec @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type processed_scopedManifests {
+    name: String
+    location: String
+    account: String
+    
+}
+
+type jobStatus {
+    provider: String
+    completionDetails: completionDetails @relation(name: "NEXT", direction: OUT)
+    jobState: String
+    name: String
+    createdTime: Float
+    location: String
+    pods: [pods] @relation(name: "NEXT", direction: OUT)
+    account: String
     
 }
 
 type pipelineParameters {
+    tenant_id: String
+    new_index: String
+    index: String
     tenant_ids: String
     env: String
     region: String
+    list: String
     manifest_id: String
     platform: String
+    source_manifest_id: String
+    
+}
+
+type completionDetails {
+    reason: String
+    exitCode: String
+    message: String
+    signal: String
+    
+}
+
+type imagePullSecrets {
+    name: String
+    
+}
+
+type createdArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    name: String
+    location: String
+    type: String
+    
+}
+
+type outputs_manifestNamesByNamespace {
+    kronos: [String]
+    
+}
+
+type lastState {
+    id: String
+    
+}
+
+type lastTransitionTime {
+    dayOfYear: Float
+    equalNow: Boolean
+    year: Float
+    weekyear: Float
+    chronology: chronology @relation(name: "NEXT", direction: OUT)
+    weekOfWeekyear: Float
+    secondOfMinute: Float
+    millisOfDay: Float
+    monthOfYear: Float
+    beforeNow: Boolean
+    dayOfWeek: Float
+    minuteOfDay: Float
+    dayOfMonth: Float
+    era: Float
+    zone: zone @relation(name: "NEXT", direction: OUT)
+    yearOfCentury: Float
+    centuryOfEra: Float
+    hourOfDay: Float
+    secondOfDay: Float
+    millis: Float
+    yearOfEra: Float
+    minuteOfHour: Float
+    afterNow: Boolean
+    millisOfSecond: Float
+    
+}
+
+type COMPONENT_TAGS {
+    SMOKE_TEST_PLATFORM_TAG: String
+    DESIRED_COUNT_XPOD: String
+    IMPORT_TAG: String
+    ADMIN_LAST: String
+    SFE_CLIENT_VERSION: String
+    ADMIN_PASS: String
+    DESIRED_COUNT_NGINX: String
+    XPOD_CLIENT_TAG: String
+    CEB_TAG: String
+    SBE_BOOTSTRAP_TAG: String
+    API_GATEWAY_TAG: String
+    IMPORT_CLEANUP_TAG: String
+    EXPORT_TAG: String
+    ADMIN_FIRST: String
+    SFE_ADMIN_BUILD: String
+    SFE_CLIENT_BUILD: String
+    AGENT_TAG: String
+    DESIRED_COUNT_SBE: String
+    SBE_TAG: String
+    DESIRED_COUNT_AGENT: String
+    TEARDOWN_TAG: String
+    REGRESSION_TAG: String
+    TENANT_NAME: String
+    SFE_LOGIN_BUILD: String
+    SFE_ADMIN_VERSION: String
+    VOID: String
+    SFE_LOGIN_VERSION: String
+    ADMIN_EMAIL: String
+    
+}
+
+type secretKeyRef {
+    name: String
+    key: String
+    
+}
+
+type outputs_createdArtifacts {
+    customKind: Boolean
+    reference: String
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    name: String
+    location: String
+    type: String
+    
+}
+
+type deploy_jobs {
+    kronos: [String]
+    
+}
+
+type resultObjects {
+    createdArtifacts: [createdArtifacts] @relation(name: "NEXT", direction: OUT)
+    deployedNamesByLocation: deployedNamesByLocation @relation(name: "NEXT", direction: OUT)
+    manifests: [manifests] @relation(name: "NEXT", direction: OUT)
+    manifestNamesByNamespace: manifestNamesByNamespace @relation(name: "NEXT", direction: OUT)
+    boundArtifacts: [String]
+    
+}
+
+type startTime {
+    dayOfYear: Float
+    equalNow: Boolean
+    year: Float
+    weekyear: Float
+    chronology: chronology @relation(name: "NEXT", direction: OUT)
+    weekOfWeekyear: Float
+    secondOfMinute: Float
+    millisOfDay: Float
+    monthOfYear: Float
+    beforeNow: Boolean
+    dayOfWeek: Float
+    minuteOfDay: Float
+    dayOfMonth: Float
+    era: Float
+    zone: zone @relation(name: "NEXT", direction: OUT)
+    yearOfCentury: Float
+    centuryOfEra: Float
+    hourOfDay: Float
+    secondOfDay: Float
+    millis: Float
+    yearOfEra: Float
+    minuteOfHour: Float
+    afterNow: Boolean
+    millisOfSecond: Float
+    
+}
+
+type selector {
+    matchLabels: matchLabels @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type value {
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type terminated {
+    reason: String
+    exitCode: String
+    startedAt: startedAt @relation(name: "NEXT", direction: OUT)
+    containerID: String
+    finishedAt: finishedAt @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type authentication {
+    allowedAccounts: [String]
+    user: String
+    
+}
+
+type parentExecution {
+    keepWaitingPipelines: Boolean
+    pipelineConfigId: String
+    systemNotifications: [String]
+    buildTime: Float
+    spelEvaluator: String
+    origin: String
+    trigger: trigger @relation(name: "NEXT", direction: OUT)
+    type: String
+    canceled: Boolean
+    limitConcurrent: Boolean
+    application: String
+    initialConfig: initialConfig @relation(name: "NEXT", direction: OUT)
+    name: String
+    stages: [stages] @relation(name: "NEXT", direction: OUT)
+    startTime: Float
+    id: String
+    notifications: [String]
+    status: String
+    authentication: authentication @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type variables {
+    sourceValue: String
+    value: String
+    key: String
     
 }
 
@@ -37,27 +715,35 @@ type manifest {
     
 }
 
-type imagePullSecrets {
-    name: String
+type tenant_manifest {
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    
+}
+
+type resources {
+    id: String
     
 }
 
 type trigger {
     nextStage: [stages] @relation(name: "NEXT", direction: OUT)
     expectedArtifacts: [String]
+    parentExecution: parentExecution @relation(name: "NEXT", direction: OUT)
     eventId: String
     dryRun: Boolean
+    parentPipelineStageId: String
     rebake: Boolean
     type: String
     enabled: Boolean
     executionId: String
     resolvedExpectedArtifacts: [String]
+    correlationId: String
     strategy: Boolean
     user: String
     parameters: parameters @relation(name: "NEXT", direction: OUT)
     notifications: [String]
     preferred: Boolean
-    artifacts: [String]
+    artifacts: [artifacts] @relation(name: "NEXT", direction: OUT)
     
 }
 
@@ -65,15 +751,6 @@ type env {
     name: String
     value: String
     valueFrom: valueFrom @relation(name: "NEXT", direction: OUT)
-    
-}
-
-type spec {
-    template: template @relation(name: "NEXT", direction: OUT)
-    backoffLimit: Float
-    imagePullSecrets: [imagePullSecrets] @relation(name: "NEXT", direction: OUT)
-    containers: [containers] @relation(name: "NEXT", direction: OUT)
-    restartPolicy: String
     
 }
 
@@ -99,16 +776,45 @@ type Pipeline {
     initialConfig: initialConfig @relation(name: "NEXT", direction: OUT)
     name: String
     stages: [stages] @relation(name: "NEXT", direction: OUT)
+    startTime: Float
     id: String
+    endTime: Float
     notifications: [String]
     status: String
     authentication: authentication @relation(name: "NEXT", direction: OUT)
     
 }
 
-type secretKeyRef {
-    name: String
-    key: String
+type finishedAt {
+    dayOfYear: Float
+    equalNow: Boolean
+    year: Float
+    weekyear: Float
+    chronology: chronology @relation(name: "NEXT", direction: OUT)
+    weekOfWeekyear: Float
+    secondOfMinute: Float
+    millisOfDay: Float
+    monthOfYear: Float
+    beforeNow: Boolean
+    dayOfWeek: Float
+    minuteOfDay: Float
+    dayOfMonth: Float
+    era: Float
+    zone: zone @relation(name: "NEXT", direction: OUT)
+    yearOfCentury: Float
+    centuryOfEra: Float
+    hourOfDay: Float
+    secondOfDay: Float
+    millis: Float
+    yearOfEra: Float
+    minuteOfHour: Float
+    afterNow: Boolean
+    millisOfSecond: Float
+    
+}
+
+type manifestNamesByNamespaceToRefresh {
+    kronos: [String]
     
 }
 
@@ -117,96 +823,136 @@ type initialConfig {
     
 }
 
-type preconditions {
-    context: context @relation(name: "NEXT", direction: OUT)
-    failPipeline: Boolean
-    type: String
+type deployedNamesByLocation {
+    kronos: [String]
     
 }
 
 type stages {
     nextStage: stages @relation(name: "NEXT", direction: OUT)
     outputs: outputs @relation(name: "NEXT", direction: OUT)
+    type: String
+    parentStageId: String
+    syntheticStageOwner: String
     requisiteStageRefIds: [String]
     name: String
     context: context @relation(name: "NEXT", direction: OUT)
+    startTime: Float
     id: String
     refId: String
-    type: String
-    tasks: [String]
+    endTime: Float
+    tasks: [tasks] @relation(name: "NEXT", direction: OUT)
     status: String
     
 }
 
-type context {
-    variables: [variables] @relation(name: "NEXT", direction: OUT)
-    comments: String
-    propertyFile: String
-    expression: String
-    pipelineParameters: pipelineParameters @relation(name: "NEXT", direction: OUT)
-    credentials: String
-    manifest: String
-    consumeArtifactSource: String
-    source: String
-    waitForCompletion: Boolean
-    pipeline: String
-    failOnFailedExpressions: Boolean
-    application: String
-    preconditions: [preconditions] @relation(name: "NEXT", direction: OUT)
-    cloudProvider: String
-    alias: String
-    completeOtherBranchesThenFail: Boolean
-    failPipeline: Boolean
-    account: String
-    continuePipeline: Boolean
+type manifests {
+    metadata: metadata @relation(name: "NEXT", direction: OUT)
+    apiVersion: String
+    kind: String
+    spec: spec @relation(name: "NEXT", direction: OUT)
+    status: String
     
 }
 
-type containers {
-    image: String
-    imagePullPolicy: String
+type pods {
     name: String
-    env: String
+    status: String
     
 }
 
-type parameters {
-    set_manifest_as_default: String
-    debug: String
-    manifest: String
-    region: String
-    env: String
-    update_tenant_manifests: String
-    platform: String
-    
-}
-
-type authentication {
-    allowedAccounts: [String]
-    user: String
+type propertyFileContents {
+    updatedBy: String
+    code: String
+    namespaceValue: String
+    tenant_ids: String
+    updatedDate: String
+    staged: Boolean
+    message: String
+    COMPONENT_TAGS: COMPONENT_TAGS @relation(name: "NEXT", direction: OUT)
+    createdDate: String
+    createdBy: String
+    namespace: String
+    context: context @relation(name: "NEXT", direction: OUT)
+    eTag: String
+    id: String
+    value: String
+    key: String
     
 }
 
 type Query {
     outputs: [outputs]
-    template: [template]
-    variables: [variables]
+    exception: [exception]
     metadata: [metadata]
+    source_manifest: [source_manifest]
+    startedAt: [startedAt]
+    chronology: [chronology]
+    annotations: [annotations]
+    deployedManifests: [deployedManifests]
+    kato_tasks: [kato_tasks]
+    manifestNamesByNamespace: [manifestNamesByNamespace]
+    stageEnabled: [stageEnabled]
+    parameters_tenant: [parameters_tenant]
+    securityContext: [securityContext]
+    source: [source]
+    spec: [spec]
+    zone: [zone]
+    AllPipelines: [AllPipelines]
+    context: [context]
+    kato_last_task_id: [kato_last_task_id]
+    details: [details]
+    state: [state]
+    tasks: [tasks]
+    artifacts: [artifacts]
+    matchLabels: [matchLabels]
+    containerStatuses: [containerStatuses]
+    history: [history]
+    labels: [labels]
+    preconditions: [preconditions]
+    outputs_manifests: [outputs_manifests]
+    containers: [containers]
+    refreshed_scopedManifests: [refreshed_scopedManifests]
+    conditions: [conditions]
+    parameters: [parameters]
+    deploy_server_groups: [deploy_server_groups]
+    status: [status]
+    template: [template]
+    processed_scopedManifests: [processed_scopedManifests]
+    jobStatus: [jobStatus]
     pipelineParameters: [pipelineParameters]
-    manifest: [manifest]
+    completionDetails: [completionDetails]
     imagePullSecrets: [imagePullSecrets]
+    createdArtifacts: [createdArtifacts]
+    outputs_manifestNamesByNamespace: [outputs_manifestNamesByNamespace]
+    lastState: [lastState]
+    lastTransitionTime: [lastTransitionTime]
+    COMPONENT_TAGS: [COMPONENT_TAGS]
+    secretKeyRef: [secretKeyRef]
+    outputs_createdArtifacts: [outputs_createdArtifacts]
+    deploy_jobs: [deploy_jobs]
+    resultObjects: [resultObjects]
+    startTime: [startTime]
+    selector: [selector]
+    value: [value]
+    terminated: [terminated]
+    authentication: [authentication]
+    parentExecution: [parentExecution]
+    variables: [variables]
+    manifest: [manifest]
+    tenant_manifest: [tenant_manifest]
+    resources: [resources]
     trigger: [trigger]
     env: [env]
-    spec: [spec]
     valueFrom: [valueFrom]
     Pipeline: [Pipeline]
-    secretKeyRef: [secretKeyRef]
+    finishedAt: [finishedAt]
+    manifestNamesByNamespaceToRefresh: [manifestNamesByNamespaceToRefresh]
     initialConfig: [initialConfig]
-    preconditions: [preconditions]
+    deployedNamesByLocation: [deployedNamesByLocation]
     stages: [stages]
-    context: [context]
-    containers: [containers]
-    parameters: [parameters]
-    authentication: [authentication]
+    manifests: [manifests]
+    pods: [pods]
+    propertyFileContents: [propertyFileContents]
     
 }

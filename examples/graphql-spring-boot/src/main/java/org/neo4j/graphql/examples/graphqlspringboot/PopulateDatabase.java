@@ -1,17 +1,13 @@
 package org.neo4j.graphql.examples.graphqlspringboot;
 
-import graphql.com.google.common.base.Charsets;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.neo4j.driver.*;
 import org.neo4j.driver.Record;
 import org.neo4j.driver.exceptions.Neo4jException;
-import org.yaml.snakeyaml.Yaml;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -45,35 +41,6 @@ public class PopulateDatabase implements AutoCloseable {
         } catch (Neo4jException ex) {
             LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
             throw ex;
-        }
-    }
-
-    public static void updateYAML() {
-        Yaml yaml = new Yaml();
-        String yamlString = "org :\n" +
-                "  neo4j :\n" +
-                "    driver :\n" +
-                "      uri : " + GraphqlSpringBootApplication.uri + "\n" +
-                "      authentication :\n" +
-                "        username : " + GraphqlSpringBootApplication.user + "\n" +
-                "        password : " + GraphqlSpringBootApplication.password + "\n" +
-                "      config :\n" +
-                "        encrypted : " + GraphqlSpringBootApplication.encrypted + "\n" +
-                "database : " + GraphqlSpringBootApplication.database + "\n" +
-                "spring :\n" +
-                "  graphql :\n" +
-                "    schema :\n" +
-                "      printer :\n" +
-                "        enabled : " + GraphqlSpringBootApplication.printer + "\n" +
-                "    graphiql :\n" +
-                "      enabled : " + GraphqlSpringBootApplication.graphiql + "\n";
-        Map<String, Object> data = yaml.load(yamlString);
-        try {
-            File file = new File("examples/graphql-spring-boot/src/main/resources/application.yaml");
-            PrintWriter writer = new PrintWriter(file);
-            yaml.dump(data, writer);
-        } catch (IOException e) {
-            System.out.println("fail");
         }
     }
 

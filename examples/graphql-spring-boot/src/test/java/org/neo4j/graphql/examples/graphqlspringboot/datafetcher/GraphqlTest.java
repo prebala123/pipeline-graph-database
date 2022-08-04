@@ -82,7 +82,7 @@ public class GraphqlTest {
                     "  \n" +
                     "}\n");
 
-            Assert.assertEquals(whenSendPostRequest_thenCorrect(temp).toString(), "{\n" +
+            JSONObject comp = QueryBuilder("{\n" +
                     "  \"data\": {\n" +
                     "    \"stages\": [\n" +
                     "      {\n" +
@@ -104,6 +104,8 @@ public class GraphqlTest {
                     "    ]\n" +
                     "  }\n" +
                     "}");
+
+            Assert.assertEquals(whenSendPostRequest_thenCorrect(temp).toString(),comp.toString());
 
     }
 

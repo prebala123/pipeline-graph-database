@@ -19,7 +19,7 @@ public class SendRequest {
     }
 
     static String path = "C:/Users/rebal/Documents/Pipeline/pipeline.json";
-    static String uri = "neo4j://localhost";
+    static String uri = "";
     static String user = "neo4j";
     static String password = "movies";
 

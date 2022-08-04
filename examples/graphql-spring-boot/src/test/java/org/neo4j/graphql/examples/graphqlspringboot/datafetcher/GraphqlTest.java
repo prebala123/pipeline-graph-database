@@ -1,6 +1,7 @@
 package org.neo4j.graphql.examples.graphqlspringboot.datafetcher;
 
 import com.vimalselvam.graphql.GraphqlTemplate;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.HttpServerErrorException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.JsonNode;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.shaded.okhttp3.*;
@@ -110,6 +112,26 @@ public class GraphqlTest {
 
     }
 
+    @Test
+    public void IncorrectInputTest() throws IOException {
+
+        JSONObject temp = QueryBuilder("query{\n" +
+                "  \n" +
+                "  stages{\n" +
+                "    \n" +
+                "    length\n" +
+                "  }\n" +
+                "}");
+
+        try{
+
+          String curr = whenSendPostRequest_thenCorrect(temp).toString();
+        }
+        catch (HttpServerErrorException e){}
+
+
+    }
+
     public static JSONObject whenSendPostRequest_thenCorrect(JSONObject jo) {
         try {
             final okhttp3.MediaType JSON
@@ -133,6 +155,7 @@ public class GraphqlTest {
             return null;
         }
     }
+
 
 
     public static JSONObject QueryBuilder(String query) {

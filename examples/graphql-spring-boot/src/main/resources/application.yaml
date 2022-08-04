@@ -8,7 +8,7 @@ org:
       config:
         encrypted: false
 database: neo4j
-dataPath: C:/Users/rebal/Documents/Pipeline/pipelines-array.json
+dataPath: C:/Users/rebal/Documents/Pipeline/pipeline.json
 spring:
   graphql:
     schema:

@@ -69,26 +69,6 @@ public class PopulateDatabase implements AutoCloseable {
         return hm;
     }
 
-    public static JSONObject readJSON() {
-        String path = GraphqlSpringBootApplication.dataPath;
-        JSONObject jo = null;
-        try {
-            File myObj = new File(path);
-            Scanner myReader = new Scanner(myObj);
-            String allJson = "";
-            while (myReader.hasNextLine()) {
-                String data = myReader.nextLine();
-                allJson += data;
-            }
-            jo = new JSONObject(allJson);
-            myReader.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-        }
-        return jo;
-    }
-
     public void addPipeline(JSONObject jo, String type, String id, String pipelineId) {
         HashMap<String, HashSet<String>> hm = separateFields(jo);
         Iterator<String> it = jo.keys();
@@ -108,7 +88,6 @@ public class PopulateDatabase implements AutoCloseable {
 
         while (it.hasNext()) {
             String k = it.next();
-            //System.out.println(k);
 
             String k2 = new String(k.toCharArray());
 
@@ -122,7 +101,6 @@ public class PopulateDatabase implements AutoCloseable {
                 lst.add(k2 + ": \"" + (jo.getJSONObject(k).toString())
                         .replace("\\", "/")
                         .replace("\"", "\\\"")
-                        //.replace("/", "\\")
                         + "\"");
             }
 
@@ -133,7 +111,6 @@ public class PopulateDatabase implements AutoCloseable {
                 lst.add(k2 + ": \"" + ((String) jo.get(k))
                         .replace("\\", "/")
                         .replace("\"", "\\\"")
-                        //.replace("/", "\\")
                         + "\"");
             }
             else if (hm.get("Array").contains(k)) {
@@ -156,8 +133,6 @@ public class PopulateDatabase implements AutoCloseable {
         String finalCypher = cypher;
         String nodeId = null;
 
-        //System.out.println(finalCypher);
-
         try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
@@ -165,7 +140,6 @@ public class PopulateDatabase implements AutoCloseable {
             });
             nodeId = record.get("node").toString();
             nodeId = nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">"));
-            //System.out.println(type + ": " + nodeId.substring(nodeId.indexOf("<") + 1, nodeId.indexOf(">")));
         } catch (Neo4jException ex) {
             System.out.println(finalCypher);
             LOGGER.log(Level.SEVERE, finalCypher + " raised an exception", ex);
@@ -242,7 +216,6 @@ public class PopulateDatabase implements AutoCloseable {
         String password = GraphqlSpringBootApplication.password;
 
         try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
-            //app.deleteAll();
             if (jo.has("stages")) {
                 app.addPipeline(jo, "Pipeline", null, jo.getString("id"));
                 app.addPrevStages(jo, jo.getString("id"));
@@ -273,7 +246,6 @@ public class PopulateDatabase implements AutoCloseable {
         try (Session session = driver.session(SessionConfig.forDatabase(GraphqlSpringBootApplication.database))) {
             Record record = session.writeTransaction(tx -> {
                 Result result = tx.run(finalCypher);
-                //return result.single();
                 return null;
             });
         } catch (Neo4jException ex) {

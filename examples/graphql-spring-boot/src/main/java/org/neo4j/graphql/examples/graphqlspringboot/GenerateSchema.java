@@ -10,33 +10,18 @@ import java.util.*;
 
 public class GenerateSchema {
 
-    static HashMap<String, String[]> info = new HashMap<>();
     static HashMap<String, HashSet<String>> otherFields = new HashMap<>();
 
     public static void main(String[] args) {
         //add relationships and fields first
-        addRelationships();
         addFields();
         makeSchema();
-    }
-
-    public static void addRelationships() {
-        //add all relationships here
-
-        /*addRelationInfo("stages", "outputs", "OUTPUTS", "OUT");
-        addRelationInfo("stages", "context", "CONTEXTUALIZES", "OUT");
-        addRelationInfo("stages", "tasks", "REQUIRED_TASKS", "OUT");
-        addRelationInfo("stages", "status", "STATUS", "OUT");*/
     }
 
     public static void addFields() {
         //add our own fields not defined by JSON
         addOtherData("stages", "nextStage: stages @relation(name: \"NEXT\", direction: OUT)");
         addOtherData("trigger", "nextStage: [stages] @relation(name: \"NEXT\", direction: OUT)");
-    }
-
-    public static void addRelationInfo(String node, String field, String relationship, String direction) {
-        info.put(node + "->" + field, new String[]{relationship, direction});
     }
 
     public static void addOtherData(String node, String field) {
@@ -50,10 +35,7 @@ public class GenerateSchema {
     }
 
     public static String[] getRelationInfo(String node, String field) {
-        if (info.containsKey(node + "->" + field))
-            return info.get(node + "->" + field);
-        else
-            return new String[]{"NEXT", "OUT"};
+        return new String[]{"NEXT", "OUT"};
     }
 
     public static void makeSchema() {

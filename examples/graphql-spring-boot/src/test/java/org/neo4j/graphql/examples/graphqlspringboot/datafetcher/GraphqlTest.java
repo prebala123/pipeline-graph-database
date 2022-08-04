@@ -3,6 +3,7 @@ package org.neo4j.graphql.examples.graphqlspringboot.datafetcher;
 import com.vimalselvam.graphql.GraphqlTemplate;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -82,7 +83,7 @@ public class GraphqlTest {
                     "  \n" +
                     "}\n");
 
-            JSONObject comp = QueryBuilder("{\n" +
+            String comp = "{\n" +
                     "  \"data\": {\n" +
                     "    \"stages\": [\n" +
                     "      {\n" +
@@ -103,9 +104,9 @@ public class GraphqlTest {
                     "      }\n" +
                     "    ]\n" +
                     "  }\n" +
-                    "}");
+                    "}";
 
-            Assert.assertEquals(whenSendPostRequest_thenCorrect(temp).toString(),comp.toString());
+            JSONAssert.assertEquals(whenSendPostRequest_thenCorrect(temp), new JSONObject(comp), false);
 
     }
 

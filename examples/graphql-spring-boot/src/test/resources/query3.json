@@ -1,0 +1,39 @@
+query{
+
+  stages(where:{AND:{startTime_gte: 1654613866953, endTime_lte: 1654613946777}}){
+
+  outputs{
+
+  artifacts{
+
+  name
+}
+
+buildInfo{
+  artifacts{
+  name
+}
+}
+
+outputs_createdArtifacts{
+name
+version
+}
+outputs_boundArtifacts{
+name
+type
+}
+requiredArtifacts{
+name
+type
+}
+optionalArtifacts{
+name
+type
+}
+}
+
+
+}
+
+}

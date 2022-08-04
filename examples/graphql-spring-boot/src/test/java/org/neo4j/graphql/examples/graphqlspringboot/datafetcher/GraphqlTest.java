@@ -41,7 +41,7 @@ public class GraphqlTest {
         }
 
     @Test
-    public void testGraphqlWithNoVariables() throws IOException {
+    public void testQ3GraphqlWithNoVariables() throws IOException {
 
             JSONObject temp = QueryBuilder("query{\n" +
                     "  \n" +
@@ -131,6 +131,80 @@ public class GraphqlTest {
 
 
     }
+
+@Test
+public void testQ1GraphqlWithNoVariables() throws IOException {
+
+    JSONObject temp = QueryBuilder("query{\n" +
+            "  \n" +
+            "\n" +
+            " \n" +
+            "  stages(where:{context:{parameters:{imageIds:\"quay.io/opsmxpublic/canary-issuegen:issue-canary-gen-1265\"}}}){\n" +
+            "    \n" +
+            "    context{\n" +
+            "      \n" +
+            "      parameters{\n" +
+            "        \n" +
+            "        connectors{\n" +
+            "          \n" +
+            "         values{\n" +
+            "          jira_ticket_no\n" +
+            "        }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    }\n" +
+            "  }\n" +
+            "  \n" +
+            "  \n" +
+            "\n" +
+            "\n" +
+            "  \n" +
+            "  \n" +
+            "  \n" +
+            "  \n" +
+            "}");
+
+    String comp = "{\n" +
+            "  \"data\": {\n" +
+            "    \"stages\": [\n" +
+            "      {\n" +
+            "        \"context\": {\n" +
+            "          \"parameters\": {\n" +
+            "            \"connectors\": [\n" +
+            "              {\n" +
+            "                \"values\": [\n" +
+            "                  {\n" +
+            "                    \"jira_ticket_no\": null\n" +
+            "                  }\n" +
+            "                ]\n" +
+            "              },\n" +
+            "              {\n" +
+            "                \"values\": [\n" +
+            "                  {\n" +
+            "                    \"jira_ticket_no\": null\n" +
+            "                  }\n" +
+            "                ]\n" +
+            "              },\n" +
+            "              {\n" +
+            "                \"values\": [\n" +
+            "                  {\n" +
+            "                    \"jira_ticket_no\": \"ENG-519\"\n" +
+            "                  }\n" +
+            "                ]\n" +
+            "              }\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        }\n" +
+            "      }\n" +
+            "    ]\n" +
+            "  }\n" +
+            "}";
+
+    JSONAssert.assertEquals(whenSendPostRequest_thenCorrect(temp), new JSONObject(comp), false);
+
+}
+
+
 
     public static JSONObject whenSendPostRequest_thenCorrect(JSONObject jo) {
         try {

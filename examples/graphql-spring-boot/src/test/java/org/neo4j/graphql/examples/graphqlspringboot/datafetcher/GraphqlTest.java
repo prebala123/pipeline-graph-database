@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigInteger;
 
 import org.testng.Assert;
 
@@ -42,6 +43,8 @@ public class GraphqlTest {
 
     @Test
     public void testQ3GraphqlWithNoVariables() throws IOException {
+
+
 
             JSONObject temp = QueryBuilder("query{\n" +
                     "  \n" +
@@ -108,7 +111,7 @@ public class GraphqlTest {
                     "  }\n" +
                     "}";
 
-            JSONAssert.assertEquals(whenSendPostRequest_thenCorrect(temp), new JSONObject(comp), false);
+            Assert.assertEquals(whenSendPostRequest_thenCorrect(temp).getJSONObject("data").getJSONArray("stages").getJSONObject(0).getJSONObject("outputs").getJSONObject("buildInfo").getJSONArray("artifacts").getJSONObject(0).get("name").toString(), "Spin-canary-issuegen-build-Deploy", String.valueOf(false));
 
     }
 

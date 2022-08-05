@@ -24,13 +24,8 @@ With This in place you can
 
 ```graphql
 query{
-  other
-  movies (options: {limit: 3}){
-    title
-    bar
-    javaData {
-      name
-    }
+  Pipeline {
+    name
   }
 }
 ```

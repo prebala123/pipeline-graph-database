@@ -20,7 +20,7 @@ public class GenerateSchema {
 
     public static void addFields() {
         //add our own fields not defined by JSON
-        addOtherData("stages", "nextStage: stages @relation(name: \"NEXT\", direction: OUT)");
+        addOtherData("stages", "nextStage: [stages] @relation(name: \"NEXT\", direction: OUT)");
         addOtherData("trigger", "nextStage: [stages] @relation(name: \"NEXT\", direction: OUT)");
     }
 
@@ -34,12 +34,8 @@ public class GenerateSchema {
         }
     }
 
-    public static String[] getRelationInfo(String node, String field) {
-        return new String[]{"NEXT", "OUT"};
-    }
-
     public static void makeSchema() {
-        Object obj = readJSON2();
+        Object obj = readJSON();
         JSONObject jo = new JSONObject();
         HashMap<String, HashSet<String>> fieldTypes;
         HashMap<String, HashSet<String>> schema = new HashMap<>();
@@ -72,12 +68,10 @@ public class GenerateSchema {
             for (String s : value2) {
                 String dataType = getKeyByValue(fieldTypes, s);
                 if (dataType.equals("Object")) {
-                    String[] info = getRelationInfo(key2, s);
-                    dataType = cleanFields(s) + " @relation(name: \"" + info[0] + "\", direction: " + info[1] + ")";
+                    dataType = cleanFields(s) + " @relation(name: \"NEXT\", direction: OUT)";
                 }
                 if (dataType.equals("Array")) {
-                    String[] info = getRelationInfo(key2, s);
-                    dataType = "[" + cleanFields(s) + "] @relation(name: \"" + info[0] + "\", direction: " + info[1] + ")";
+                    dataType = "[" + cleanFields(s) + "] @relation(name: \"NEXT\", direction: OUT)";
                 }
                 if (dataType.equals("StringArr") || dataType.equals("Other"))
                     dataType = "[String]";
@@ -176,7 +170,7 @@ public class GenerateSchema {
         }
     }
 
-    public static Object readJSON2() {
+    public static Object readJSON() {
         String path = GraphqlSpringBootApplication.dataPath;
         Object jo = null;
         try {

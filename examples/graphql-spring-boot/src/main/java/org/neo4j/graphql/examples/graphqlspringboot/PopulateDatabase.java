@@ -296,19 +296,9 @@ public class PopulateDatabase implements AutoCloseable {
     public static HashSet<Integer> deletedPipelines = new HashSet<>();
 
     public static void main(String[] args){
-        String uri = GraphqlSpringBootApplication.uri;
-        String user = GraphqlSpringBootApplication.user;
-        String password = GraphqlSpringBootApplication.password;
 
-        try (PopulateDatabase app = new PopulateDatabase(uri, user, password, Config.defaultConfig())) {
-            app.deleteAll();
-        } catch (Exception e) {
-            System.out.println("fail");
-        }
         deletedPipelines = new HashSet<>();
 
         fullPopulate();
-        System.out.println("finished");
-        System.out.println(deletedPipelines);
     }
 }

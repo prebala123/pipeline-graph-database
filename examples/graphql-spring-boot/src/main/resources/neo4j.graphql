@@ -1082,7 +1082,7 @@ type deployedNamesByLocation {
 }
 
 type stages {
-    nextStage: stages @relation(name: "NEXT", direction: OUT)
+    nextStage: [stages] @relation(name: "NEXT", direction: OUT)
     outputs: outputs @relation(name: "NEXT", direction: OUT)
     requisiteStageRefIds: [String]
     name: String

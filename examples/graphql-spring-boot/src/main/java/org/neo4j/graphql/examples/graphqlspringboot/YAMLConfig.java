@@ -18,7 +18,6 @@ public class YAMLConfig {
         Map<String, Object> driver = (Map<String, Object>) neo4j.get("driver");
         Map<String, Object> authentication = (Map<String, Object>) driver.get("authentication");
         String database = (String) obj.get("database");
-        String dataPath = (String) obj.get("dataPath");
         String uri = (String) driver.get("uri");
         String user = (String) authentication.get("username");
         String password = (String) authentication.get("password");
@@ -26,7 +25,6 @@ public class YAMLConfig {
         GraphqlSpringBootApplication.user = user;
         GraphqlSpringBootApplication.password = password;
         GraphqlSpringBootApplication.database = database;
-        GraphqlSpringBootApplication.dataPath = dataPath;
     }
 
 }

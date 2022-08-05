@@ -1,14 +1,13 @@
 org:
   neo4j:
     driver:
-      uri: neo4j://localhost
+      uri: <uri>
       authentication:
-        username: neo4j
-        password: movies
+        username: <username>
+        password: <password>
       config:
         encrypted: false
-database: neo4j
-dataPath: C:/Users/rebal/Documents/Pipeline/pipeline.json
+database: <database>
 spring:
   graphql:
     schema:
